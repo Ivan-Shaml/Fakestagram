@@ -18,4 +18,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\DTOs\Comments\" />
+    <Folder Include="Data\DTOs\Posts\" />
+    <Folder Include="Data\DTOs\Users\" />
+  </ItemGroup>
+
 </Project>

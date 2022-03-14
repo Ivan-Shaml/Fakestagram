@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Fakestagram.Data.DTOs.Users;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fakestagram.Controllers
@@ -9,7 +10,13 @@ namespace Fakestagram.Controllers
     {
         public UsersController()
         {
+        }
 
+
+        [HttpGet]
+        public ActionResult<UserReadDTO> GetById(Guid id)
+        {
+            return null;
         }
     }
 }

@@ -9,8 +9,10 @@ namespace Fakestagram.Models
         public string UserName { get; set; }
         
         [Required]
-        [MinLength(6, ErrorMessage = "The minimum password length is 6 characters.")]
-        public string Password { get; set; }
+        public string PasswordHash { get; set; }
+        
+        [Required]
+        public string PasswordSalt { get; set; }
 
         [Required]
         [EmailAddress]

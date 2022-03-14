@@ -19,7 +19,7 @@ namespace Fakestagram.Data.Repositories
 
         public User GetByEmailAndPassword(string email, string password)
         {
-            return _dbSet.FirstOrDefault(x => x.Email == email && x.Password == password);
+            return _dbSet.FirstOrDefault(x => x.Email == email && x.PasswordHash == password);
         }
 
         public User GetByUsername(string username)
@@ -29,7 +29,7 @@ namespace Fakestagram.Data.Repositories
 
         public User GetByUsernameAndPassword(string username, string password)
         {
-            return _dbSet.FirstOrDefault(x => x.UserName == username && x.Password == password);
+            return _dbSet.FirstOrDefault(x => x.UserName == username && x.PasswordHash == password);
         }
 
         public List<User> GetUserFollowers(Guid userId)

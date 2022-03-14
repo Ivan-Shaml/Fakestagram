@@ -1,4 +1,10 @@
 using Fakestagram.Data;
+using Fakestagram.Data.AutoMapperProfile;
+using Fakestagram.Data.Repositories;
+using Fakestagram.Data.Repositories.Contracts;
+using Fakestagram.Services;
+using Fakestagram.Services.Contracts;
+using Fakestagram.Services.Providers;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +17,25 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<FakestagramDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddAutoMapper(conf => conf.AddProfile(new AutoMapperProfile()));
+
+// Repositories
+
+builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+builder.Services.AddScoped<IFollowRepository, FollowRepository>();
+builder.Services.AddScoped<IPostsRepository, PostsRepository>();
+
+// Services
+
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPasswordProvider, SHA512PasswordProvider>();
+builder.Services.AddHttpContextAccessor();
+
+// Provider-services
+
+builder.Services.AddScoped<IAuthProvider, JwtAuthProvider>();
+builder.Services.AddScoped<IAuthProvider, JwtAuthProvider>();
 
 var app = builder.Build();
 

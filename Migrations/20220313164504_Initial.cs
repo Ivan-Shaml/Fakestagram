@@ -55,7 +55,7 @@ namespace Fakestagram.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserCreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ImgUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

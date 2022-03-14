@@ -20,8 +20,7 @@
 
   <ItemGroup>
     <Folder Include="Data\DTOs\Comments\" />
-    <Folder Include="Data\DTOs\Posts\" />
-    <Folder Include="Data\DTOs\Users\" />
+    <Folder Include="Exceptions\" />
   </ItemGroup>
 
 </Project>

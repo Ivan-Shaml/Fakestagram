@@ -6,7 +6,7 @@ namespace Fakestagram.Data.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : BaseModel
     {
-        protected readonly DbContext _context;
+        protected readonly FakestagramDbContext _context;
         protected readonly DbSet<T> _dbSet;
 
         public GenericRepository(FakestagramDbContext dbContext)
@@ -15,21 +15,21 @@ namespace Fakestagram.Data.Repositories
             _dbSet = _context.Set<T>();
         }
 
-        public IEnumerable<T> GetAll() => _dbSet.ToList();
+        public virtual IEnumerable<T> GetAll() => _dbSet.ToList();
 
-        public T GetById(Guid id)
+        public virtual T GetById(Guid id)
         {
             return _dbSet.FirstOrDefault(u => u.Id == id);
         }
 
-        public void Create(T item)
+        public virtual void Create(T item)
         {
             _dbSet.Add(item);
 
             _context.SaveChanges();
         }
 
-        public void Update(T item)
+        public virtual void Update(T item)
         {
             T entity = GetById(item.Id);
 
@@ -43,7 +43,7 @@ namespace Fakestagram.Data.Repositories
             _context.SaveChanges();
         }
 
-        public void Save(T item)
+        public virtual void Save(T item)
         {
             if (item.Id != Guid.Empty)
             {
@@ -55,7 +55,7 @@ namespace Fakestagram.Data.Repositories
             }
         }
 
-        public void Delete(Guid id)
+        public virtual void Delete(Guid id)
         {
             var entity = GetById(id);
 

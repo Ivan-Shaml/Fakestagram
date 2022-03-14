@@ -9,9 +9,7 @@ namespace Fakestagram.Models
         public Guid UserCreatorId { get; set; }
         
         [Required]
-        public string Url { get; set; }
-
-
+        public string ImgUrl { get; set; }
         public virtual List<Comment> Comments { get; set; }
         public virtual List<PostLike> Likes { get; set; }
 

@@ -19,11 +19,6 @@ namespace Fakestagram.Services
             _repo = repo;
             _mapper = mapper;
         }
-        public void Delete(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
         public virtual List<TReadDTO> GetAll() => _repo.GetAll().Select(entity => _mapper.Map<TModel, TReadDTO>((entity))).ToList();
 
         public virtual TReadDTO GetById(Guid id)
@@ -55,5 +50,11 @@ namespace Fakestagram.Services
 
             return _mapper.Map<TModel, TReadDTO>(entity);
         }
+
+        public virtual void Delete(Guid id)
+        {
+            _repo.Delete(id);
+        }
+
     }
 }

@@ -23,12 +23,12 @@ namespace Fakestagram.Controllers
         }
 
 
-        [HttpGet("{id}")]
-        public ActionResult<UserReadDTO> GetById(Guid id)
+        [HttpGet("{userId}")]
+        public ActionResult<UserReadDTO> GetById(Guid userId)
         {
             try
             {
-                var userReadDto = _userService.GetById(id);
+                var userReadDto = _userService.GetById(userId);
                 return Ok(userReadDto);
             }
             catch (UserNotFoundException unfx)

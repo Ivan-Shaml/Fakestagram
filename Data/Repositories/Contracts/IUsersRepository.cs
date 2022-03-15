@@ -3,7 +3,7 @@ using Fakestagram.Models;
 
 namespace Fakestagram.Data.Repositories.Contracts
 {
-    public interface IUsersRepository : IPostsRepository<User>
+    public interface IUsersRepository : IGenericRepository<User>
     {
         User GetByUsernameAndPassword(string username, string password);
         User GetByEmailAndPassword(string email, string password);

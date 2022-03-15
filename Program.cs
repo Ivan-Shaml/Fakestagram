@@ -57,12 +57,17 @@ builder.Services.AddAutoMapper(conf => conf.AddProfile(new AutoMapperProfile()))
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddScoped<IFollowRepository, FollowRepository>();
 builder.Services.AddScoped<IPostsRepository, PostsRepository>();
+builder.Services.AddScoped<ICommentsRepository, CommentsRepository>();
+
+builder.Services.AddScoped<IPostLikesRepository, PostLikesRepository>();
+builder.Services.AddScoped<ICommentLikesRepository, CommentLikesRepository>();
 
 // Services
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<ILikesService, LikesService>();
 builder.Services.AddHttpContextAccessor();
 
 // Provider-services

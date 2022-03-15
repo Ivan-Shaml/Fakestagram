@@ -40,6 +40,7 @@ namespace Fakestagram.Data.Repositories
                         PostId = item.Id,
                         CommentsCount = item.Comments.Count,
                         LikesCount = item.Likes.Count,
+                        Description = item.Description
                     }
                 );
             }
@@ -66,6 +67,7 @@ namespace Fakestagram.Data.Repositories
                 PostId = post.Id,
                 CommentsCount = post.Comments.Count,
                 LikesCount = post.Likes.Count,
+                Description = post.Description
             };
 
             return postReadDTO;

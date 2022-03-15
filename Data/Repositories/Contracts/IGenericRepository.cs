@@ -2,7 +2,7 @@
 
 namespace Fakestagram.Data.Repositories.Contracts
 {
-    public interface IPostsRepository<T> where T : BaseModel
+    public interface IGenericRepository<T> where T : BaseModel
     {
         IEnumerable<T> GetAll();
         T GetById(Guid id);

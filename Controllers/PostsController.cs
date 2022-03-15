@@ -29,7 +29,7 @@ namespace Fakestagram.Controllers
             return Ok(_postService.GetAll());
         }
 
-        [HttpGet("{postId}")]
+        [HttpGet("{postId}", Name = "GetById")]
         public ActionResult<PostReadDTO> GetById(Guid postId)
         {
             try
@@ -50,12 +50,9 @@ namespace Fakestagram.Controllers
             try
             {
                 string imgPath = _postService.UploadImage(file);
-                string baseUrl = _configuration.GetSection("AppBaseUrl").Value;
                 var postReadDTO = _postService.SaveNewPost(imgPath);
 
-                postReadDTO.ImgUrl = $"{baseUrl}{postReadDTO.ImgUrl}";
-
-                return postReadDTO;
+                return CreatedAtRoute(nameof(GetById), new {postId = postReadDTO.PostId}, postReadDTO);
             }
             catch (InvalidDataException idx)
             {
@@ -78,6 +75,36 @@ namespace Fakestagram.Controllers
             catch (FileNotFoundException fnfx)
             {
                 return NotFound(_jsonErrorSr.Serialize(fnfx));
+            }
+        }
+
+        [HttpPut("{postId}")]
+        public ActionResult<PostReadDTO> UpdatePost(Guid postId, PostUpdateDTO postUpdateDTO)
+        {
+            try
+            {
+                PostEditDTO postEditDto = new PostEditDTO()
+                {
+                    PostId = postId,
+                    Description = postUpdateDTO.Description
+                };
+
+                var currentUser = _userService.GetCurrentUser();
+                var post = _postService.GetByIdToModel(postId);
+
+                if (post.UserCreatorId != currentUser.Id)
+                {
+                    return Forbid();
+                }
+
+                _postService.Update(postEditDto);
+
+                return NoContent();
+
+            }
+            catch (InvalidDataException idx)
+            {
+                return NotFound(_jsonErrorSr.Serialize(idx));
             }
         }
     }

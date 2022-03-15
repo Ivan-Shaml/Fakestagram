@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fakestagram.Data.Repositories
 {
-    public class GenericRepository<T> : IPostsRepository<T> where T : BaseModel
+    public class GenericRepository<T> : IGenericRepository<T> where T : BaseModel
     {
         protected readonly FakestagramDbContext _context;
         protected readonly DbSet<T> _dbSet;

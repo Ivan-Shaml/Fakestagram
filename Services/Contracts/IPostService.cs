@@ -8,5 +8,6 @@ namespace Fakestagram.Services.Contracts
         string UploadImage(IFormFile file);
         PostReadDTO SaveNewPost(string filePath);
         List<Post> GetAllByUserCreatorId(Guid userId);
+        Post GetByIdToModel(Guid id);
     }
 }

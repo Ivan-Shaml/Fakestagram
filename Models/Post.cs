@@ -10,6 +10,9 @@ namespace Fakestagram.Models
         
         [Required]
         public string ImgUrl { get; set; }
+
+        [Required]
+        public string Description { get; set; } = string.Empty;
         public virtual List<Comment> Comments { get; set; }
         public virtual List<PostLike> Likes { get; set; }
 

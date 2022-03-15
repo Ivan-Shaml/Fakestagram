@@ -1,4 +1,5 @@
-﻿using Fakestagram.Data.DTOs.Users;
+﻿using Fakestagram.Data.DTOs;
+using Fakestagram.Data.DTOs.Users;
 using Fakestagram.Models;
 
 namespace Fakestagram.Services.Contracts
@@ -9,6 +10,8 @@ namespace Fakestagram.Services.Contracts
         string UserLogin(UserLoginDTO userLoginDTO);
         void Follow(Guid userId);
         void Unfollow(Guid userId);
+        List<UserListFollowsDTO> GetUserFollowers(Guid userId);
+        List<UserListFollowsDTO> GetUserFollowings(Guid userId);
         User GetCurrentUser();
     }
 }

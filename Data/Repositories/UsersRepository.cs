@@ -34,12 +34,7 @@ namespace Fakestagram.Data.Repositories
 
         public List<User> GetUserFollowers(Guid userId)
         {
-            User u = _dbSet.FirstOrDefault(x => x.Id == userId);
-
-            if (u is null)
-            {
-                throw new InvalidDataException("User with the specified Id is not found.");
-            }
+            base.GetById(userId);
 
             return _context.Follows
                 .Include(x => x.UserFollowed)
@@ -49,12 +44,7 @@ namespace Fakestagram.Data.Repositories
 
         public List<User> GetUserFollowings(Guid userId)
         {
-            User u = _dbSet.FirstOrDefault(x => x.Id == userId);
-
-            if (u is null)
-            {
-                throw new InvalidDataException("User with the specified Id is not found.");
-            }
+           base.GetById(userId);
 
             return _context.Follows
                 .Include(x => x.UserFollower)

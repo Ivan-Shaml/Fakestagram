@@ -29,7 +29,7 @@
 
   <ItemGroup>
     <Folder Include="Data\DTOs\Comments\" />
-    <Folder Include="wwwroot\" />
+    <Folder Include="wwwroot\imgs\edba9568-8fbe-4df9-767f-08da069c933a\" />
   </ItemGroup>
 
 </Project>

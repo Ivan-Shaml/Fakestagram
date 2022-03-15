@@ -1,4 +1,5 @@
-﻿using Fakestagram.Exceptions;
+﻿using Fakestagram.Data.DTOs;
+using Fakestagram.Exceptions;
 using Fakestagram.Services.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,8 +19,8 @@ namespace Fakestagram.Controllers
             _jsonErrorSerializer = jsonErrorSerializer;
         }
 
-        [HttpPut]
-        public ActionResult<object> FollowUser(Guid targetUserId)
+        [HttpPut("{targetUserId}")]
+        public ActionResult FollowUser(Guid targetUserId)
         {
             try
             {
@@ -29,7 +30,7 @@ namespace Fakestagram.Controllers
             }
             catch (InvalidDataException indx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(indx));
+                return NotFound(_jsonErrorSerializer.Serialize(indx));
             }
             catch (UserNotFoundException unfx)
             {
@@ -37,8 +38,8 @@ namespace Fakestagram.Controllers
             }
         }
 
-        [HttpDelete]
-        public ActionResult<object> UnfollowUser(Guid targetUserId)
+        [HttpDelete("{targetUserId}")]
+        public ActionResult UnfollowUser(Guid targetUserId)
         {
             try
             {
@@ -48,11 +49,43 @@ namespace Fakestagram.Controllers
             }
             catch (InvalidDataException indx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(indx));
+                return NotFound(_jsonErrorSerializer.Serialize(indx));
             }
             catch (UserNotFoundException unfx)
             {
                 return BadRequest(_jsonErrorSerializer.Serialize(unfx));
+            }
+        }
+
+        [HttpGet("GetUserFollowers/{targetUserId}")]
+
+        public ActionResult<UserListFollowsDTO> GetUserFollowers(Guid targetUserId)
+        {
+            try
+            {
+                var usersFollowersList = _userService.GetUserFollowers(targetUserId);
+
+                return Ok(usersFollowersList);
+            }
+            catch (InvalidDataException indx)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(indx));
+            }
+        }
+
+        [HttpGet("GetUserFollowings/{targetUserId}")]
+
+        public ActionResult<UserListFollowsDTO> GetUserFollowings(Guid targetUserId)
+        {
+            try
+            {
+                var usersFollowingsList = _userService.GetUserFollowings(targetUserId);
+
+                return Ok(usersFollowingsList);
+            }
+            catch (InvalidDataException indx)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(indx));
             }
         }
     }

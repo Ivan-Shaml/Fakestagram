@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fakestagram.Data.DTOs;
 using Fakestagram.Data.DTOs.Posts;
 using Fakestagram.Data.DTOs.Users;
 using Fakestagram.Data.Repositories.Contracts;
@@ -161,6 +162,20 @@ namespace Fakestagram.Services
             }
 
             return allUsersToDto;
+        }
+
+        public List<UserListFollowsDTO> GetUserFollowers(Guid userId)
+        {
+            var users = ((IUsersRepository)_repo).GetUserFollowers(userId);
+
+            return _mapper.Map<List<UserListFollowsDTO>>(users);
+        }
+
+        public List<UserListFollowsDTO> GetUserFollowings(Guid userId)
+        {
+            var users = ((IUsersRepository)_repo).GetUserFollowings(userId);
+
+            return _mapper.Map<List<UserListFollowsDTO>>(users);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Fakestagram.Data.DTOs.Posts;
 using Fakestagram.Data.Repositories.Contracts;
+using Fakestagram.Exceptions;
 using Fakestagram.Models;
 using Fakestagram.Services.Contracts;
 using System.Security.Claims;
@@ -75,7 +76,8 @@ namespace Fakestagram.Services
                 ImgUrl = $"{baseUrl}{p.ImgUrl}",
                 PostId = p.Id,
                 CommentsCount = 0,
-                LikesCount = 0
+                LikesCount = 0,
+                Description = string.Empty,
             };
         }
 
@@ -104,10 +106,16 @@ namespace Fakestagram.Services
                 ImgUrl = $"{baseUrl}{post.ImgUrl}",
                 PostId = post.Id,
                 CommentsCount = post.Comments.Count,
-                LikesCount = post.Likes.Count
+                LikesCount = post.Likes.Count,
+                Description = post.Description
             };
 
             return postReadDTO;
+        }
+
+        public Post GetByIdToModel(Guid id)
+        {
+            return _repo.GetById(id);
         }
 
         public override List<PostReadDTO> GetAll()
@@ -123,13 +131,34 @@ namespace Fakestagram.Services
                     ImgUrl = $"{baseUrl}{post.ImgUrl}",
                     PostId = post.Id,
                     CommentsCount = post.Comments.Count,
-                    LikesCount = post.Likes.Count
+                    LikesCount = post.Likes.Count,
+                    Description = post.Description
                 };
 
                 postReadDTOs.Add(pDto);
             }
 
             return postReadDTOs;
+        }
+
+        public override PostReadDTO Update(PostEditDTO updateDto)
+        {
+            var post = _repo.GetById(updateDto.PostId);
+
+            post.Description = updateDto.Description;
+
+            _repo.Update(post);
+
+            PostReadDTO pDto = new PostReadDTO()
+            {
+                ImgUrl = $"{baseUrl}{post.ImgUrl}",
+                PostId = post.Id,
+                CommentsCount = post.Comments.Count,
+                LikesCount = post.Likes.Count,
+                Description = post.Description
+            };
+
+            return pDto;
         }
     }
 }

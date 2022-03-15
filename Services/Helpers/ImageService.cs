@@ -2,7 +2,7 @@
 
 namespace Fakestagram.Services.Helpers
 {
-    public class SaveImageService : ISaveImageService
+    public class ImageService : IImageService
     {
         public string BuildPath(string directory, string filePath)
         {
@@ -12,6 +12,15 @@ namespace Fakestagram.Services.Helpers
             }
 
             return Path.Combine(directory, filePath);
+        }
+
+        public void DeleteFile(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException("The specified file was not found.");
+            }
+            File.Delete(filePath);
         }
 
         public void SaveFile(IFormFile file, string filePath)

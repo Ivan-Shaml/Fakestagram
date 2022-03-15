@@ -5,6 +5,7 @@ namespace Fakestagram.Data.DTOs.Users
 {
     public class UserReadDTO
     {
+        public Guid UserId { get; set; }
         public string UserName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }

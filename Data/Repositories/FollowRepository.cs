@@ -25,6 +25,10 @@ namespace Fakestagram.Data.Repositories
 
                 this.Create(follow);
             }
+            else
+            {
+                throw new InvalidDataException("You already follow that user.");
+            }
         }
 
         public int GetFollowsCount(Guid userId)
@@ -42,6 +46,10 @@ namespace Fakestagram.Data.Repositories
             if (follow != null)
             {
                 this.Delete(follow.Id);
+            }
+            else
+            {
+                throw new InvalidDataException("You aren't currently following that user.");
             }
         }
     }

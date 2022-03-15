@@ -9,20 +9,23 @@ namespace Fakestagram.Services
 {
     public class PostService : GenericService<Post, PostCreateDTO, PostEditDTO, PostReadDTO>, IPostService
     {
-        private readonly ISaveImageService _saveImageService;
+        private readonly IImageService _imageService;
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
+        private string baseUrl;
 
         public PostService(IPostsRepository repo, IMapper mapper,
-                                ISaveImageService saveImageService,IWebHostEnvironment environment,
+                                IImageService imageService,IWebHostEnvironment environment,
                                 IConfiguration configuration, IUserService userService
                             ) : base(repo, mapper)
         {
-            _saveImageService = saveImageService;
+            _imageService = imageService;
             _environment = environment;
             _configuration = configuration;
             _userService = userService;
+
+            this.baseUrl = _configuration.GetSection("AppBaseUrl").Value;
         }
 
         private bool CheckFileType(string fileExtension)
@@ -49,9 +52,9 @@ namespace Fakestagram.Services
 
             string uploadDirectoryPath = Path.Combine(_environment.WebRootPath, _configuration.GetSection("ImagesUploadRoot").Value, userDirectory);
 
-            string filePath = _saveImageService.BuildPath(uploadDirectoryPath, fileName);
+            string filePath = _imageService.BuildPath(uploadDirectoryPath, fileName);
 
-            _saveImageService.SaveFile(file, filePath);
+            _imageService.SaveFile(file, filePath);
 
             return $"{_configuration.GetSection("ImagesUploadRoot").Value}/{userDirectory}/{fileName}";
 
@@ -69,16 +72,64 @@ namespace Fakestagram.Services
 
             return new PostReadDTO()
             {
-                ImgUrl = p.ImgUrl,
+                ImgUrl = $"{baseUrl}{p.ImgUrl}",
                 PostId = p.Id,
                 CommentsCount = 0,
                 LikesCount = 0
             };
         }
 
-        public void DeletePost(Guid id)
+        public override void Delete(Guid id)
         {
+            var post = _repo.GetById(id);
+
+            string fullPath = Path.Combine(_environment.WebRootPath, post.ImgUrl);
+
+            _imageService.DeleteFile(fullPath);
+
             _repo.Delete(id);
+        }
+
+        public List<Post> GetAllByUserCreatorId(Guid userId)
+        {
+            return ((IPostsRepository)_repo).GetAllByUserCreatorId(userId);
+        }
+
+        public override PostReadDTO GetById(Guid id)
+        {
+            var post = _repo.GetById(id);
+
+            var postReadDTO = new PostReadDTO()
+            {
+                ImgUrl = $"{baseUrl}{post.ImgUrl}",
+                PostId = post.Id,
+                CommentsCount = post.Comments.Count,
+                LikesCount = post.Likes.Count
+            };
+
+            return postReadDTO;
+        }
+
+        public override List<PostReadDTO> GetAll()
+        {
+            var allPosts = ((IPostsRepository)_repo).GetAll();
+
+            List<PostReadDTO> postReadDTOs = new List<PostReadDTO>();
+
+            foreach (var post in allPosts)
+            {
+                PostReadDTO pDto = new PostReadDTO()
+                {
+                    ImgUrl = $"{baseUrl}{post.ImgUrl}",
+                    PostId = post.Id,
+                    CommentsCount = post.Comments.Count,
+                    LikesCount = post.Likes.Count
+                };
+
+                postReadDTOs.Add(pDto);
+            }
+
+            return postReadDTOs;
         }
     }
 }

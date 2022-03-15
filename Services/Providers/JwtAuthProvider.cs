@@ -38,19 +38,25 @@ namespace Fakestagram.Services.Providers
             return jwt;
         }
 
-        public List<Claim> GetClaims(string token)
+        public Dictionary<string, string> GetClaims(ClaimsPrincipal userHttpContext)
         {
-            throw new NotImplementedException();
+            Dictionary<string, string> claimList = new Dictionary<string, string>(3);
+
+            claimList.Add("userName", userHttpContext?.FindFirst(ClaimTypes.Name).Value);
+            claimList.Add("userId", userHttpContext?.FindFirst(ClaimTypes.NameIdentifier).Value);
+            claimList.Add("role", userHttpContext?.FindFirst(ClaimTypes.Role).Value);
+
+            return claimList;
         }
 
-        public bool isUserAdmin(string token)
+        public bool isUserAdmin(ClaimsPrincipal userHttpContext)
         {
-            throw new NotImplementedException();
-        }
+            if (userHttpContext?.FindFirst(ClaimTypes.Role).Value == UserRoles.Administrator.ToString())
+            {
+                return true;
+            }
 
-        public bool VerifyToken(string token)
-        {
-            throw new NotImplementedException();
+            return false;
         }
     }
 }

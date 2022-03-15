@@ -7,7 +7,6 @@ namespace Fakestagram.Services.Contracts
     {
         string UploadImage(IFormFile file);
         PostReadDTO SaveNewPost(string filePath);
-
-        void DeletePost(Guid id);
+        List<Post> GetAllByUserCreatorId(Guid userId);
     }
 }

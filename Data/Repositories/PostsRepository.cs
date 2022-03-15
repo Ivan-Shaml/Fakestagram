@@ -70,5 +70,22 @@ namespace Fakestagram.Data.Repositories
 
             return postReadDTO;
         }
+
+        public override Post GetById(Guid id)
+        {
+            var post = _context.Posts.Include(c => c.Comments).Include(l => l.Likes).FirstOrDefault(x => x.Id == id);
+
+            if (post is null)
+            {
+                throw new InvalidDataException("The spectified Id is not found");
+            }
+
+            return post;
+        }
+
+        public override IEnumerable<Post> GetAll()
+        {
+            return _context.Posts.Include(c => c.Comments).Include(l => l.Likes).ToList();
+        }
     }
 }

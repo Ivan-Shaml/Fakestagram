@@ -19,7 +19,14 @@ namespace Fakestagram.Data.Repositories
 
         public virtual T GetById(Guid id)
         {
-            return _dbSet.FirstOrDefault(u => u.Id == id);
+            var entity = _dbSet.FirstOrDefault(u => u.Id == id);
+
+            if (entity is null)
+            {
+                throw new InvalidDataException("The spectified Id is not found");
+            }
+
+            return entity;
         }
 
         public virtual void Create(T item)
@@ -58,11 +65,6 @@ namespace Fakestagram.Data.Repositories
         public virtual void Delete(Guid id)
         {
             var entity = GetById(id);
-
-            if (entity is null)
-            {
-                throw new InvalidDataException("The spectified Id is not found");
-            }
 
             _dbSet.Remove(entity);
 

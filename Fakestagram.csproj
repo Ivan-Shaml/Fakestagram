@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="imgs\**" />
+    <Content Remove="imgs\**" />
+    <EmbeddedResource Remove="imgs\**" />
+    <None Remove="imgs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.3" />
@@ -22,7 +29,6 @@
 
   <ItemGroup>
     <Folder Include="Data\DTOs\Comments\" />
-    <Folder Include="imgs\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

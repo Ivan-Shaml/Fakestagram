@@ -61,7 +61,7 @@ builder.Services.AddScoped<IPostsRepository, PostsRepository>();
 // Services
 
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ISaveImageService, SaveImageService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddHttpContextAccessor();
 

@@ -32,11 +32,10 @@ namespace Fakestagram.Services
 
         public void Follow(Guid userId)
         {
-            if (_httpContextAccessor.HttpContext != null)
-            {
-                User u = _repo.GetById(Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value)) ?? throw new UserNotFoundException("The user is not found.");
-                _followRepository.Follow(userId, u.Id);
-            }
+            Dictionary<string, string> claims = _jwtProvider.GetClaims(_httpContextAccessor.HttpContext.User);
+
+            User u = _repo.GetById(Guid.Parse(claims["userId"])) ?? throw new UserNotFoundException("The user is not found.");
+            _followRepository.Follow(userId, u.Id);
         }
 
         private bool IsUserNameTaken(string username)
@@ -66,7 +65,8 @@ namespace Fakestagram.Services
                 FirstName = userRegisterDTO.FirstName,
                 LastName = userRegisterDTO.LastName,
                 PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt
+                PasswordSalt = passwordSalt,
+                Role = UserRoles.Regular,
             };
 
             ((IUsersRepository)_repo).Create(userToRegister);
@@ -80,11 +80,10 @@ namespace Fakestagram.Services
 
         public void Unfollow(Guid userId)
         {
-            if (_httpContextAccessor.HttpContext != null)
-            {
-                User u = _repo.GetById(Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value)) ?? throw new UserNotFoundException("The user is not found.");
-                _followRepository.Unfollow(userId, u.Id);
-            }
+            Dictionary<string, string> claims = _jwtProvider.GetClaims(_httpContextAccessor.HttpContext.User);
+
+            User u = _repo.GetById(Guid.Parse(claims["userId"])) ?? throw new UserNotFoundException("The user is not found.");
+            _followRepository.Unfollow(userId, u.Id);
         }
 
         public string UserLogin(UserLoginDTO userLoginDTO)
@@ -116,6 +115,7 @@ namespace Fakestagram.Services
 
             UserReadDTO userReadDTO = new UserReadDTO
             {
+                UserId = u.Id,
                 UserName = u.UserName,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
@@ -130,7 +130,37 @@ namespace Fakestagram.Services
 
         public User GetCurrentUser()
         {
-            return _repo.GetById(Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value)) ?? throw new UserNotFoundException("The user is not found.");
+            Dictionary<string, string> claims = _jwtProvider.GetClaims(_httpContextAccessor.HttpContext.User);
+
+            return _repo.GetById(Guid.Parse(claims["userId"])) ?? throw new UserNotFoundException("The user is not found.");
+        }
+
+        public override List<UserReadDTO> GetAll()
+        {
+            IEnumerable<User> allUsers = _repo.GetAll();
+
+            List<UserReadDTO> allUsersToDto = new List<UserReadDTO>();
+
+            foreach (var usr in allUsers)
+            {
+                List<PostReadDTO> userPosts = _postsRepository.GetAllByUserCreatorIdToReadDTO(usr.Id);
+
+                UserReadDTO userReadDTO = new UserReadDTO
+                {
+                    UserId = usr.Id,
+                    UserName = usr.UserName,
+                    FirstName = usr.FirstName,
+                    LastName = usr.LastName,
+                    FollowersCount = ((IUsersRepository)_repo).GetUserFollowers(usr.Id).Count,
+                    FollowingCount = ((IUsersRepository)_repo).GetUserFollowings(usr.Id).Count,
+                    Posts = userPosts,
+                    PostsCount = userPosts.Count
+                };
+
+                allUsersToDto.Add(userReadDTO);
+            }
+
+            return allUsersToDto;
         }
     }
 }

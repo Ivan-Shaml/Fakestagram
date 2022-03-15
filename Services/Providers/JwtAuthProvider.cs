@@ -19,7 +19,8 @@ namespace Fakestagram.Services.Providers
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
@@ -35,6 +36,21 @@ namespace Fakestagram.Services.Providers
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
             return jwt;
+        }
+
+        public List<Claim> GetClaims(string token)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool isUserAdmin(string token)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool VerifyToken(string token)
+        {
+            throw new NotImplementedException();
         }
     }
 }

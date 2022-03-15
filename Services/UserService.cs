@@ -34,7 +34,7 @@ namespace Fakestagram.Services
         {
             if (_httpContextAccessor.HttpContext != null)
             {
-                User u = _repo.GetById(Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).ToString())) ?? throw new UserNotFoundException("The user is not found.");
+                User u = _repo.GetById(Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value)) ?? throw new UserNotFoundException("The user is not found.");
                 _followRepository.Follow(userId, u.Id);
             }
         }
@@ -54,8 +54,8 @@ namespace Fakestagram.Services
             bool isEmailTaken = this.IsEmailTaken(userRegisterDTO.Email);
             bool isUserNameTaken = this.IsUserNameTaken(userRegisterDTO.UserName);
 
-            if(isEmailTaken) throw new EmailIsAlreadyTakenException("The specified Email is already taken.");
-            if(isUserNameTaken) throw new UserNameIsAlreadyTakenException("The specified UserName is already taken.");
+            if (isEmailTaken) throw new EmailIsAlreadyTakenException("The specified Email is already taken.");
+            if (isUserNameTaken) throw new UserNameIsAlreadyTakenException("The specified UserName is already taken.");
 
             _hmacSha256Provider.CreatePasswordHash(userRegisterDTO.Password, out string passwordHash, out string passwordSalt);
 
@@ -72,7 +72,7 @@ namespace Fakestagram.Services
             ((IUsersRepository)_repo).Create(userToRegister);
 
             string jwt = _jwtProvider.CreateToken(userToRegister);
-            
+
             user = ((IUsersRepository)_repo).GetByUsername(userToRegister.UserName);
 
             return jwt;
@@ -82,7 +82,7 @@ namespace Fakestagram.Services
         {
             if (_httpContextAccessor.HttpContext != null)
             {
-                User u = _repo.GetById(Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).ToString())) ?? throw new UserNotFoundException("The user is not found.");
+                User u = _repo.GetById(Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value)) ?? throw new UserNotFoundException("The user is not found.");
                 _followRepository.Unfollow(userId, u.Id);
             }
         }
@@ -103,30 +103,34 @@ namespace Fakestagram.Services
 
             return null;
         }
-
-        public UserReadDTO GetUserReadDTOByUserId(Guid userId)
+        public override UserReadDTO GetById(Guid id)
         {
-            User u = _repo.GetById(userId);
+            User u = _repo.GetById(id);
 
             if (u is null)
             {
-                throw new InvalidDataException("User with the specified Id is not found.");
+                throw new UserNotFoundException("User with the specified Id is not found.");
             }
 
-            List<PostReadDTO> UserPosts = _postsRepository.GetAllByUserCreatorIdToReadDTO(userId);
+            List<PostReadDTO> UserPosts = _postsRepository.GetAllByUserCreatorIdToReadDTO(id);
 
             UserReadDTO userReadDTO = new UserReadDTO
             {
                 UserName = u.UserName,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
-                FollowersCount = ((IUsersRepository)_repo).GetUserFollowers(userId).Count,
-                FollowingCount = ((IUsersRepository)_repo).GetUserFollowings(userId).Count,
+                FollowersCount = ((IUsersRepository)_repo).GetUserFollowers(id).Count,
+                FollowingCount = ((IUsersRepository)_repo).GetUserFollowings(id).Count,
                 Posts = UserPosts,
                 PostsCount = UserPosts.Count
             };
 
             return userReadDTO;
+        }
+
+        public User GetCurrentUser()
+        {
+            return _repo.GetById(Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value)) ?? throw new UserNotFoundException("The user is not found.");
         }
     }
 }

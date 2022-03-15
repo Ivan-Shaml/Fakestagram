@@ -11,10 +11,10 @@ namespace Fakestagram.Services
         where TEditDTO : class
         where TReadDTO : class
     {
-        protected readonly IGenericRepository<TModel> _repo;
+        protected readonly IPostsRepository<TModel> _repo;
         protected readonly IMapper _mapper;
 
-        public GenericService(IGenericRepository<TModel> repo, IMapper mapper)
+        public GenericService(IPostsRepository<TModel> repo, IMapper mapper)
         {
             _repo = repo;
             _mapper = mapper;

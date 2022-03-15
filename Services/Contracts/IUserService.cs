@@ -9,5 +9,6 @@ namespace Fakestagram.Services.Contracts
         string UserLogin(UserLoginDTO userLoginDTO);
         void Follow(Guid userId);
         void Unfollow(Guid userId);
+        User GetCurrentUser();
     }
 }

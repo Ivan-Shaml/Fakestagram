@@ -23,9 +23,18 @@ namespace Fakestagram.Models
         [Required]
         public string LastName { get; set; }
 
+        [Required]
+        public UserRoles Role { get; set; } = UserRoles.Regular;
+
         public virtual List<Comment> Comments { get; set; }
         public virtual List<Post> Posts { get; set; }
         public virtual List<PostLike> PostLikes { get; set; }
         public virtual List<CommentLike> CommentLikes { get; set; }
+    }
+
+    public enum UserRoles
+    {
+        Administrator = 0,
+        Regular = 1,
     }
 }

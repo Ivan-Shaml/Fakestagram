@@ -13,10 +13,12 @@ namespace Fakestagram.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IJsonErrorSerializerHelper _jsonErrorSerializer;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, IJsonErrorSerializerHelper jsonErrorSerializer)
         {
             _userService = userService;
+            _jsonErrorSerializer = jsonErrorSerializer;
         }
 
         [HttpPost("Register")]
@@ -32,11 +34,11 @@ namespace Fakestagram.Controllers
             }
             catch (EmailIsAlreadyTakenException emx)
             {
-                return BadRequest(JsonSerializer.Serialize(new { errorMessage = emx.Message }));
+                return BadRequest(_jsonErrorSerializer.Serialize(emx));
             }
             catch (UserNameIsAlreadyTakenException unx)
             {
-                return BadRequest(JsonSerializer.Serialize(new { errorMessage = unx.Message }));
+                return BadRequest(_jsonErrorSerializer.Serialize(unx));
             }
         }
 
@@ -51,7 +53,7 @@ namespace Fakestagram.Controllers
             }
             catch (UserNotFoundException unfx)
             {
-                return BadRequest(JsonSerializer.Serialize(new { errorMessage = unfx.Message }));
+                return BadRequest(_jsonErrorSerializer.Serialize(unfx));
             }
         }
 

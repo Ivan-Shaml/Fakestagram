@@ -3,7 +3,7 @@ using Fakestagram.Models;
 
 namespace Fakestagram.Data.Repositories.Contracts
 {
-    public interface IPostsRepository : IGenericRepository<Post>
+    public interface IPostsRepository : IPostsRepository<Post>
     {
         List<Post> GetAllByUserCreatorId(Guid id);
         List<PostReadDTO> GetAllByUserCreatorIdToReadDTO(Guid id);

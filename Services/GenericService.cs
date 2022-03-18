@@ -42,7 +42,7 @@ namespace Fakestagram.Services
             return _mapper.Map<TModel, TReadDTO>(entity);
         }
 
-        public virtual TReadDTO Update(TEditDTO updateDto)
+        public virtual TReadDTO Update(Guid entityId, TEditDTO updateDto)
         {
             TModel entity = _mapper.Map<TEditDTO, TModel>(updateDto);
 

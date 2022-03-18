@@ -17,9 +17,8 @@ namespace Fakestagram.Data.Repositories
 
         public List<User> GetUserListLikes(Guid commentId)
         {
-            base.GetById(commentId);
-
             return _context.CommentLikes
+                .Where(c => c.CommentId == commentId)
                 .Include(us => us.User)
                 .Select(us => us.User)
                 .ToList();

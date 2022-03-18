@@ -56,7 +56,7 @@ namespace Fakestagram.Controllers
             {
                 _likesService.DislikeComment(commentId);
                 
-                return Ok();
+                return NoContent();
             }
             catch (UserNotFoundException unfx)
             {
@@ -65,6 +65,10 @@ namespace Fakestagram.Controllers
             catch (EntityAlreadyDislikedException eadx)
             {
                 return BadRequest(_jsonErrorSerializer.Serialize(eadx));
+            }
+            catch (InvalidDataException idx)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(idx));
             }
         }
 
@@ -75,7 +79,7 @@ namespace Fakestagram.Controllers
             {
                 _likesService.DislikePost(postId);
 
-                return Ok();
+                return NoContent();
             }
             catch (UserNotFoundException unfx)
             {
@@ -84,6 +88,10 @@ namespace Fakestagram.Controllers
             catch (EntityAlreadyDislikedException eadx)
             {
                 return BadRequest(_jsonErrorSerializer.Serialize(eadx));
+            }
+            catch (InvalidDataException idx)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(idx));
             }
         }
 
@@ -104,6 +112,10 @@ namespace Fakestagram.Controllers
             {
                 return BadRequest(_jsonErrorSerializer.Serialize(eadx));
             }
+            catch (InvalidDataException idx)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(idx));
+            }
         }
         
         [HttpPut("LikePost/{postId}")]
@@ -122,6 +134,10 @@ namespace Fakestagram.Controllers
             catch (EntityAlreadyLikedException eadx)
             {
                 return BadRequest(_jsonErrorSerializer.Serialize(eadx));
+            }
+            catch (InvalidDataException idx)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(idx));
             }
         }
     }

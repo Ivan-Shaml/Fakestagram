@@ -29,7 +29,7 @@ namespace Fakestagram.Controllers
             return Ok(_postService.GetAll());
         }
 
-        [HttpGet("{postId}", Name = "GetById")]
+        [HttpGet("{postId}", Name = "GetPostById")]
         public ActionResult<PostReadDTO> GetById(Guid postId)
         {
             try
@@ -45,14 +45,14 @@ namespace Fakestagram.Controllers
         }
 
         [HttpPost]
-        public ActionResult<PostReadDTO> CreateNewPost([FromForm(Name = "image")] IFormFile file)
+        public ActionResult<PostReadDTO> CreateNewPost([FromForm] PostCreateDTO postCreateDTO)
         {
             try
             {
-                string imgPath = _postService.UploadImage(file);
-                var postReadDTO = _postService.SaveNewPost(imgPath);
+                //string imgPath = _postService.UploadImage(image);
+                var postReadDTO = _postService.SaveNewPost(postCreateDTO);
 
-                return CreatedAtRoute(nameof(GetById), new {postId = postReadDTO.PostId}, postReadDTO);
+                return CreatedAtRoute("GetPostById", new {postId = postReadDTO.PostId}, postReadDTO);
             }
             catch (InvalidDataException idx)
             {
@@ -79,16 +79,10 @@ namespace Fakestagram.Controllers
         }
 
         [HttpPut("{postId}")]
-        public ActionResult<PostReadDTO> UpdatePost(Guid postId, PostUpdateDTO postUpdateDTO)
+        public ActionResult<PostReadDTO> UpdatePost(Guid postId, PostEditDTO postEditDto)
         {
             try
             {
-                PostEditDTO postEditDto = new PostEditDTO()
-                {
-                    PostId = postId,
-                    Description = postUpdateDTO.Description
-                };
-
                 var currentUser = _userService.GetCurrentUser();
                 var post = _postService.GetByIdToModel(postId);
 
@@ -97,7 +91,7 @@ namespace Fakestagram.Controllers
                     return Forbid();
                 }
 
-                _postService.Update(postEditDto);
+                _postService.Update(postId, postEditDto);
 
                 return NoContent();
 

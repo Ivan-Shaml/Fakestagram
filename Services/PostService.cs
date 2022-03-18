@@ -61,15 +61,16 @@ namespace Fakestagram.Services
 
         }
 
-        public PostReadDTO SaveNewPost(string filePath)
+        public PostReadDTO SaveNewPost(PostCreateDTO postCreateDTO)
         {
             Post p = new Post()
             {
-                ImgUrl = filePath,
+                ImgUrl = this.UploadImage(postCreateDTO.Image),
+                Description = postCreateDTO.Description,
                 UserCreatorId = _userService.GetCurrentUser().Id
             };
 
-            _repo.Save(p);
+            ((IPostsRepository)_repo).Save(p);
 
             return new PostReadDTO()
             {
@@ -77,19 +78,22 @@ namespace Fakestagram.Services
                 PostId = p.Id,
                 CommentsCount = 0,
                 LikesCount = 0,
-                Description = string.Empty,
+                Description = p.Description,
             };
         }
 
         public override void Delete(Guid id)
         {
-            var post = _repo.GetById(id);
+            var post = ((IPostsRepository)_repo).GetById(id);
+
+            if (post is null)
+                throw new InvalidDataException("Post with the specified Id was not found.");
 
             string fullPath = Path.Combine(_environment.WebRootPath, post.ImgUrl);
 
             _imageService.DeleteFile(fullPath);
 
-            _repo.Delete(id);
+            ((IPostsRepository)_repo).Delete(id);
         }
 
         public List<Post> GetAllByUserCreatorId(Guid userId)
@@ -99,7 +103,10 @@ namespace Fakestagram.Services
 
         public override PostReadDTO GetById(Guid id)
         {
-            var post = _repo.GetById(id);
+            var post = ((IPostsRepository)_repo).GetById(id);
+
+            if (post is null)
+                throw new InvalidDataException("Post with the specified Id was not found.");
 
             var postReadDTO = new PostReadDTO()
             {
@@ -115,7 +122,12 @@ namespace Fakestagram.Services
 
         public Post GetByIdToModel(Guid id)
         {
-            return _repo.GetById(id);
+            var post = ((IPostsRepository)_repo).GetById(id);
+
+            if (post is null)
+                throw new InvalidDataException("Post with the specified Id was not found.");
+
+            return post;
         }
 
         public override List<PostReadDTO> GetAll()
@@ -141,13 +153,16 @@ namespace Fakestagram.Services
             return postReadDTOs;
         }
 
-        public override PostReadDTO Update(PostEditDTO updateDto)
+        public override PostReadDTO Update(Guid entityId, PostEditDTO updateDto)
         {
-            var post = _repo.GetById(updateDto.PostId);
+            var post = ((IPostsRepository)_repo).GetById(entityId);
+
+            if (post is null)
+                throw new InvalidDataException("Post with the specified Id was not found.");
 
             post.Description = updateDto.Description;
 
-            _repo.Update(post);
+            ((IPostsRepository)_repo).Update(post);
 
             PostReadDTO pDto = new PostReadDTO()
             {

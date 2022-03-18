@@ -34,22 +34,22 @@ namespace Fakestagram.Data.Repositories
 
         public List<User> GetUserFollowers(Guid userId)
         {
-            base.GetById(userId);
+            var user = base.GetById(userId) ?? throw new InvalidDataException("User with the specified Id is not found.");
 
             return _context.Follows
-                .Include(x => x.UserFollowed)
+                .Include(x => x.UserFollower)
                 .Where(x => x.UserFollowedId == userId)
-                .Select(x => x.UserFollowed).ToList();
+                .Select(x => x.UserFollower).ToList();
         }
 
         public List<User> GetUserFollowings(Guid userId)
         {
-           base.GetById(userId);
+            var user = base.GetById(userId) ?? throw new InvalidDataException("User with the specified Id is not found.");
 
             return _context.Follows
-                .Include(x => x.UserFollower)
+                .Include(x => x.UserFollowed)
                 .Where(x => x.UserFollowerId == userId)
-                .Select(x => x.UserFollower).ToList();
+                .Select(x => x.UserFollowed).ToList();
         }
     }
 }

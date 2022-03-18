@@ -35,8 +35,8 @@ namespace Fakestagram.Services
         {
             Dictionary<string, string> claims = _jwtProvider.GetClaims(_httpContextAccessor.HttpContext.User);
 
-            User u = _repo.GetById(Guid.Parse(claims["userId"])) ?? throw new UserNotFoundException("The user is not found.");
-            _followRepository.Follow(userId, u.Id);
+            User u = ((IUsersRepository)_repo).GetById(Guid.Parse(claims["userId"])) ?? throw new UserNotFoundException("The user is not found.");
+            _followRepository.Follow(u.Id, userId);
         }
 
         private bool IsUserNameTaken(string username)
@@ -83,8 +83,8 @@ namespace Fakestagram.Services
         {
             Dictionary<string, string> claims = _jwtProvider.GetClaims(_httpContextAccessor.HttpContext.User);
 
-            User u = _repo.GetById(Guid.Parse(claims["userId"])) ?? throw new UserNotFoundException("The user is not found.");
-            _followRepository.Unfollow(userId, u.Id);
+            User u = ((IUsersRepository)_repo).GetById(Guid.Parse(claims["userId"])) ?? throw new UserNotFoundException("The user is not found.");
+            _followRepository.Unfollow(u.Id, userId);
         }
 
         public string UserLogin(UserLoginDTO userLoginDTO)
@@ -100,12 +100,12 @@ namespace Fakestagram.Services
             {
                 return _jwtProvider.CreateToken(u);
             }
-
-            return null;
+            
+            throw new UserNotFoundException("The username or password is incorrect.");
         }
         public override UserReadDTO GetById(Guid id)
         {
-            User u = _repo.GetById(id);
+            User u = ((IUsersRepository)_repo).GetById(id);
 
             if (u is null)
             {
@@ -133,12 +133,12 @@ namespace Fakestagram.Services
         {
             Dictionary<string, string> claims = _jwtProvider.GetClaims(_httpContextAccessor.HttpContext.User);
 
-            return _repo.GetById(Guid.Parse(claims["userId"])) ?? throw new UserNotFoundException("The user is not found.");
+            return ((IUsersRepository)_repo).GetById(Guid.Parse(claims["userId"])) ?? throw new UserNotFoundException("The user is not found.");
         }
 
         public override List<UserReadDTO> GetAll()
         {
-            IEnumerable<User> allUsers = _repo.GetAll();
+            IEnumerable<User> allUsers = ((IUsersRepository)_repo).GetAll();
 
             List<UserReadDTO> allUsersToDto = new List<UserReadDTO>();
 

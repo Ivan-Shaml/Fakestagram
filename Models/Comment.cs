@@ -11,7 +11,9 @@ namespace Fakestagram.Models
         public Guid PostId { get; set; }
         [Required]
         public string Text { get; set; }
-        
+
+        public DateTime PostedAt { get; set; } = DateTime.UtcNow;
+
         [ForeignKey("PostId")]
         public virtual Post Post { get; set; }
 

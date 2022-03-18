@@ -68,6 +68,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ILikesService, LikesService>();
+builder.Services.AddScoped<ICommentsService, CommentsService>();
 builder.Services.AddHttpContextAccessor();
 
 // Provider-services

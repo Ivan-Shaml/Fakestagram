@@ -17,10 +17,9 @@ namespace Fakestagram.Data.Repositories
 
         public List<User> GetUserListLikes(Guid postId)
         {
-            base.GetById(postId);
-
-            return _context.PostLikes.
-                Include(us => us.User)
+            return _context.PostLikes
+                .Where(p => p.PostId == postId)
+                .Include(us => us.User)
                 .Select(us => us.User)
                 .ToList();
         }

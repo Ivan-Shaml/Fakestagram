@@ -1,8 +1,10 @@
-﻿namespace Fakestagram.Data.DTOs.Posts
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Fakestagram.Data.DTOs.Posts
 {
     public class PostEditDTO
     {
-        public Guid PostId { get; set; }
+        [Required]
         public string Description { get; set; }
     }
 }

@@ -36,6 +36,10 @@ namespace Fakestagram.Controllers
             {
                 return BadRequest(_jsonErrorSerializer.Serialize(unfx));
             }
+            catch (EntityAlreadyLikedException uafe)
+            {
+                return BadRequest(_jsonErrorSerializer.Serialize(uafe));
+            }
         }
 
         [HttpDelete("{targetUserId}")]
@@ -55,11 +59,15 @@ namespace Fakestagram.Controllers
             {
                 return BadRequest(_jsonErrorSerializer.Serialize(unfx));
             }
+            catch (EntityAlreadyDislikedException eadx)
+            {
+                return BadRequest(_jsonErrorSerializer.Serialize(eadx));
+            }
         }
 
         [HttpGet("GetUserFollowers/{targetUserId}")]
 
-        public ActionResult<UserListFollowsDTO> GetUserFollowers(Guid targetUserId)
+        public ActionResult<List<UserListFollowsDTO>> GetUserFollowers(Guid targetUserId)
         {
             try
             {
@@ -75,7 +83,7 @@ namespace Fakestagram.Controllers
 
         [HttpGet("GetUserFollowings/{targetUserId}")]
 
-        public ActionResult<UserListFollowsDTO> GetUserFollowings(Guid targetUserId)
+        public ActionResult<List<UserListFollowsDTO>> GetUserFollowings(Guid targetUserId)
         {
             try
             {

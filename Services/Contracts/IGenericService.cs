@@ -11,7 +11,7 @@ namespace Fakestagram.Services.Contracts
         List<TReadDTO> GetAll();
         TReadDTO GetById(Guid id);
         TReadDTO Insert(TCreateDTO createDto);
-        TReadDTO Update(TEditDTO updateDto);
+        TReadDTO Update(Guid entityId, TEditDTO updateDto);
         void Delete(Guid id);
     }
 }

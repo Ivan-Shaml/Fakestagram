@@ -10,10 +10,10 @@ namespace Fakestagram.Data.AutoMapperProfile
         {
             //TODO: Implement Automapper at a later stage...
 
-            CreateMap<User, UserListFollowsDTO>();
-            CreateMap<List<User>, List<UserListFollowsDTO>>();
-            CreateMap<User, UserListLikesDTO>();
-            CreateMap<List<User>, List<UserListLikesDTO>>();
+            CreateMap<User, UserListFollowsDTO>().ForMember(dto => dto.UserId, m => m.MapFrom(m => m.Id));
+            //CreateMap<List<User>, List<UserListFollowsDTO>>();
+            CreateMap<User, UserListLikesDTO>().ForMember(dto => dto.UserId, m => m.MapFrom(m => m.Id));
+            //CreateMap<List<User>, List<UserListLikesDTO>>();
         }
     }
 }

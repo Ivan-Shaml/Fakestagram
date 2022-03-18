@@ -32,6 +32,8 @@ namespace Fakestagram.Services
         {
             User currentUser = _userService.GetCurrentUser();
 
+            var commentFromDb = _commentsRepository.GetById(targetCommentId) ?? throw new InvalidDataException("The specified Id is not found.");
+
             var commentLike = _commentLikesRepo.GetByCommentId(targetCommentId, currentUser.Id) ?? throw new EntityAlreadyDislikedException("The Comment is already disliked.");
 
             _commentLikesRepo.Delete(commentLike.Id);
@@ -41,6 +43,8 @@ namespace Fakestagram.Services
         {
             User currentUser = _userService.GetCurrentUser();
 
+            var postFromDb = _postsRepository.GetById(targetPostId) ?? throw new InvalidDataException("The specified Id is not found.");
+
             var postLike = _postLikesRepo.GetByPostId(targetPostId, currentUser.Id) ?? throw new EntityAlreadyDislikedException("The Post is already disliked.");
 
             _postLikesRepo.Delete(postLike.Id);
@@ -48,6 +52,8 @@ namespace Fakestagram.Services
 
         public List<UserListLikesDTO> GetUsersLikedCommentList(Guid targetCommentId)
         {
+            var commentFromDb = _commentsRepository.GetById(targetCommentId) ?? throw new InvalidDataException("The specified Id is not found.");
+
             var usersLikedList = _commentLikesRepo.GetUserListLikes(targetCommentId);
 
             return _mapper.Map<List<UserListLikesDTO>>(usersLikedList);
@@ -55,6 +61,8 @@ namespace Fakestagram.Services
 
         public List<UserListLikesDTO> GetUsersLikedPostList(Guid targetPostId)
         {
+            var postFromDb = _postsRepository.GetById(targetPostId) ?? throw new InvalidDataException("The specified Id is not found.");
+
             var usersLikedList = _postLikesRepo.GetUserListLikes(targetPostId);
 
             return _mapper.Map<List<UserListLikesDTO>>(usersLikedList);
@@ -64,6 +72,8 @@ namespace Fakestagram.Services
         {
             User currentUser = _userService.GetCurrentUser();
 
+            var commentFromDb = _commentsRepository.GetById(targetCommentId) ?? throw new InvalidDataException("The specified Id is not found.");
+
             var checkEntity = _commentLikesRepo.GetByCommentId(targetCommentId, currentUser.Id);
 
             if (checkEntity is not null)
@@ -71,7 +81,10 @@ namespace Fakestagram.Services
                 throw new EntityAlreadyLikedException("You have already liked this comment.");
             }
 
-            _commentsRepository.GetById(targetCommentId);
+            var comment = _commentsRepository.GetById(targetCommentId);
+
+            if (comment is null)
+                throw new InvalidDataException("Comment with the specified Id was not found.");
 
             var commentLike = new CommentLike()
             {
@@ -86,6 +99,8 @@ namespace Fakestagram.Services
         {
             User currentUser = _userService.GetCurrentUser();
 
+            var postFromDb = _postsRepository.GetById(targetPostId) ?? throw new InvalidDataException("The specified Id is not found.");
+
             var checkEntity = _postLikesRepo.GetByPostId(targetPostId, currentUser.Id);
 
             if (checkEntity is not null)
@@ -93,7 +108,10 @@ namespace Fakestagram.Services
                 throw new EntityAlreadyLikedException("You have already liked this post.");
             }
 
-            _postsRepository.GetById(targetPostId);
+            var comment = _postsRepository.GetById(targetPostId);
+            
+            if (comment is null)
+                throw new InvalidDataException("Comment with the specified Id was not found.");
 
             var postLike = new PostLike()
             {

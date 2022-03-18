@@ -33,7 +33,7 @@ namespace Fakestagram.Controllers
             }
             catch (UserNotFoundException unfx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(unfx));
+                return NotFound(_jsonErrorSerializer.Serialize(unfx));
             }
         }
 

@@ -8,9 +8,14 @@ namespace Fakestagram.Data.Repositories
 {
     public class PostsRepository : GenericRepository<Post>, IPostsRepository
     {
-        public PostsRepository(FakestagramDbContext context)
+        private readonly IConfiguration _configuration;
+        private string baseUrl;
+        public PostsRepository(FakestagramDbContext context, IConfiguration configuration)
             :base(context)
         {
+            _configuration = configuration;
+
+            this.baseUrl = _configuration.GetSection("AppBaseUrl").Value;
         }
         public List<Post> GetAllByUserCreatorId(Guid id)
         {
@@ -36,7 +41,7 @@ namespace Fakestagram.Data.Repositories
                 postReadDTOs.Add(
                     new PostReadDTO()
                     {
-                        ImgUrl = item.ImgUrl,
+                        ImgUrl = $"{this.baseUrl}{item.ImgUrl}",
                         PostId = item.Id,
                         CommentsCount = item.Comments.Count,
                         LikesCount = item.Likes.Count,
@@ -63,7 +68,7 @@ namespace Fakestagram.Data.Repositories
 
             var postReadDTO = new PostReadDTO()
             {
-                ImgUrl = post.ImgUrl,
+                ImgUrl = $"{this.baseUrl}{post.ImgUrl}",
                 PostId = post.Id,
                 CommentsCount = post.Comments.Count,
                 LikesCount = post.Likes.Count,

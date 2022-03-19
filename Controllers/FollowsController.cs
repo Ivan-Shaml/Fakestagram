@@ -1,6 +1,7 @@
 ﻿using Fakestagram.Data.DTOs;
 using Fakestagram.Exceptions;
 using Fakestagram.Services.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,6 +9,7 @@ namespace Fakestagram.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class FollowsController : ControllerBase
     {
         private readonly IUserService _userService;

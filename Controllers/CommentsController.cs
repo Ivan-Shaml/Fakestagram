@@ -1,6 +1,7 @@
 ﻿using Fakestagram.Data.DTOs.Comments;
 using Fakestagram.Exceptions;
 using Fakestagram.Services.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,20 +9,26 @@ namespace Fakestagram.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CommentsController : ControllerBase
     {
         private readonly ICommentsService _commentsService;
         private readonly IJsonErrorSerializerHelper _jsonErrorSerializer;
+        private readonly IUserService _userService;
 
-        public CommentsController(ICommentsService commentsService, IJsonErrorSerializerHelper jsonErrorSerializer)
+        public CommentsController(ICommentsService commentsService, IJsonErrorSerializerHelper jsonErrorSerializer, IUserService userService)
         {
             _commentsService = commentsService;
             _jsonErrorSerializer = jsonErrorSerializer;
+            _userService = userService;
         }
 
         [HttpGet]
         public ActionResult<List<CommentReadDTO>> GetAll()
         {
+            if (!_userService.isCurrentUserAdmin())
+                return Forbid();
+
             return Ok(_commentsService.GetAllCommentsToDto());
         }
 
@@ -30,6 +37,9 @@ namespace Fakestagram.Controllers
         {
             try
             {
+                if (!_userService.isCurrentUserAdmin())
+                    return Forbid();
+
                 return Ok(_commentsService.GetCommentsByUserId(userId));
             }
             catch (UserNotFoundException unfx)
@@ -39,6 +49,7 @@ namespace Fakestagram.Controllers
         }
 
         [HttpGet("GetAllCommentsForPost/{postId}")]
+        [AllowAnonymous]
         public ActionResult<List<CommentReadDTO>> GetAllCommentsForPost(Guid postId)
         {
             try
@@ -52,6 +63,7 @@ namespace Fakestagram.Controllers
         }
 
         [HttpGet("{commentId}", Name = "GetCommentById")]
+        [AllowAnonymous]
         public ActionResult<CommentReadDTO> GetById(Guid commentId)
         {
             try
@@ -69,6 +81,9 @@ namespace Fakestagram.Controllers
         {
             try
             {
+                if (!_userService.isCurrentUserAdmin() || _commentsService.GetById(commentId)?.UserId != _userService.GetCurrentUser()?.Id)
+                    return Forbid();
+
                 _commentsService.Update(commentId, commentEditDTO);
 
                 return NoContent();
@@ -85,6 +100,9 @@ namespace Fakestagram.Controllers
         {
             try
             {
+                if (!_userService.isCurrentUserAdmin() || _commentsService.GetById(commentId)?.UserId != _userService.GetCurrentUser()?.Id)
+                    return Forbid();
+
                 _commentsService.Delete(commentId);
 
                 return NoContent();

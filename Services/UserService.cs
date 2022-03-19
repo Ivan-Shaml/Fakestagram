@@ -177,5 +177,10 @@ namespace Fakestagram.Services
 
             return _mapper.Map<List<UserListFollowsDTO>>(users);
         }
+
+        public bool isCurrentUserAdmin()
+        {
+            return _jwtProvider.isUserAdmin(_httpContextAccessor.HttpContext.User);
+        }
     }
 }

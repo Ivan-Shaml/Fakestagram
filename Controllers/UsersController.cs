@@ -2,6 +2,7 @@
 using Fakestagram.Exceptions;
 using Fakestagram.Models;
 using Fakestagram.Services.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,7 @@ namespace Fakestagram.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -40,6 +42,9 @@ namespace Fakestagram.Controllers
         [HttpGet]
         public ActionResult<List<UserReadDTO>> GetAll()
         {
+            if (!_userService.isCurrentUserAdmin())
+                return Forbid();
+
             List<UserReadDTO> allUsers = _userService.GetAll();
 
             return Ok(allUsers);
@@ -52,6 +57,9 @@ namespace Fakestagram.Controllers
             {
                 var user = _userService.GetById(userId);
 
+                if (!_userService.isCurrentUserAdmin() || userId != _userService.GetCurrentUser()?.Id)
+                    return Forbid();
+
                 List<Post> userPosts = _postService.GetAllByUserCreatorId(userId);
 
                 foreach (var post in userPosts)
@@ -60,8 +68,8 @@ namespace Fakestagram.Controllers
                 }
 
                 _userService.Delete(userId);
-                return NoContent();
 
+                return NoContent();
             }
             catch (InvalidDataException idx)
             {

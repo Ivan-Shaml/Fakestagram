@@ -13,5 +13,6 @@ namespace Fakestagram.Services.Contracts
         List<UserListFollowsDTO> GetUserFollowers(Guid userId);
         List<UserListFollowsDTO> GetUserFollowings(Guid userId);
         User GetCurrentUser();
+        bool isCurrentUserAdmin();
     }
 }

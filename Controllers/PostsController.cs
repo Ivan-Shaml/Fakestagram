@@ -1,5 +1,6 @@
 ﻿using Fakestagram.Data.DTOs.Posts;
 using Fakestagram.Services.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,29 +8,30 @@ namespace Fakestagram.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PostsController : ControllerBase
     {
         private readonly IUserService _userService;
         private readonly IPostService _postService;
         private readonly IJsonErrorSerializerHelper _jsonErrorSr;
-        private readonly IConfiguration _configuration;
 
         public PostsController(IUserService userService, IPostService postService,
-            IJsonErrorSerializerHelper jsonErrorSr, IConfiguration configuration)
+            IJsonErrorSerializerHelper jsonErrorSr)
         {
             _userService = userService;
             _postService = postService;
             _jsonErrorSr = jsonErrorSr;
-            _configuration = configuration;
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult<List<PostReadDTO>> GetAll()
         {
             return Ok(_postService.GetAll());
         }
 
         [HttpGet("{postId}", Name = "GetPostById")]
+        [AllowAnonymous]
         public ActionResult<PostReadDTO> GetById(Guid postId)
         {
             try
@@ -52,7 +54,7 @@ namespace Fakestagram.Controllers
                 //string imgPath = _postService.UploadImage(image);
                 var postReadDTO = _postService.SaveNewPost(postCreateDTO);
 
-                return CreatedAtRoute("GetPostById", new {postId = postReadDTO.PostId}, postReadDTO);
+                return CreatedAtRoute("GetPostById", new { postId = postReadDTO.PostId }, postReadDTO);
             }
             catch (InvalidDataException idx)
             {
@@ -65,7 +67,11 @@ namespace Fakestagram.Controllers
         {
             try
             {
+                if (!_userService.isCurrentUserAdmin() || _postService.GetByIdToModel(postId)?.UserCreatorId != _userService.GetCurrentUser()?.Id)
+                    return Forbid();
+
                 _postService.Delete(postId);
+
                 return NoContent();
             }
             catch (InvalidDataException idx)
@@ -94,7 +100,6 @@ namespace Fakestagram.Controllers
                 _postService.Update(postId, postEditDto);
 
                 return NoContent();
-
             }
             catch (InvalidDataException idx)
             {

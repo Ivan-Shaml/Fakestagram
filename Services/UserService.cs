@@ -178,9 +178,63 @@ namespace Fakestagram.Services
             return _mapper.Map<List<UserListFollowsDTO>>(users);
         }
 
-        public bool isCurrentUserAdmin()
+        public bool IsCurrentUserAdmin()
         {
             return _jwtProvider.isUserAdmin(_httpContextAccessor.HttpContext.User);
+        }
+
+        public void ChangeUserRole(Guid userId)
+        {
+            var user = ((IUsersRepository) _repo).GetById(userId) ??
+                       throw new UserNotFoundException("User with the specified Id is not found.");
+
+            if (user.Role == UserRoles.Administrator)
+            {
+                user.Role = UserRoles.Regular;
+            }
+            else if(user.Role == UserRoles.Regular)
+            {
+                user.Role = UserRoles.Administrator;
+            }
+
+            ((IUsersRepository)_repo).Update(user);
+        }
+
+        public override UserReadDTO Update(Guid entityId, UserEditDTO updateDto)
+        {
+            var userFromDb = ((IUsersRepository) _repo).GetById(entityId) ??
+                             throw new UserNotFoundException("User with the specified Id is not found.");
+
+            if (userFromDb.Email != updateDto.Email && this.IsEmailTaken(updateDto.Email))
+            {
+                throw new EmailIsAlreadyTakenException("The specified Email is already taken.");
+            }
+
+            if (userFromDb.UserName != updateDto.UserName && this.IsUserNameTaken(updateDto.UserName))
+            {
+                throw new UserNameIsAlreadyTakenException("The specified UserName is already taken.");
+            }
+
+            userFromDb.Email = updateDto.Email;
+            userFromDb.UserName = updateDto.UserName;
+            userFromDb.FirstName = updateDto.FirstName;
+            userFromDb.LastName = updateDto.LastName;
+
+            ((IUsersRepository)_repo).Update(userFromDb);
+
+            List<PostReadDTO> userPosts = _postsRepository.GetAllByUserCreatorIdToReadDTO(userFromDb.Id);
+
+            return new UserReadDTO
+            {
+                UserId = userFromDb.Id,
+                UserName = userFromDb.UserName,
+                FirstName = userFromDb.FirstName,
+                LastName = userFromDb.LastName,
+                FollowersCount = ((IUsersRepository)_repo).GetUserFollowers(userFromDb.Id).Count,
+                FollowingCount = ((IUsersRepository)_repo).GetUserFollowings(userFromDb.Id).Count,
+                Posts = userPosts,
+                PostsCount = userPosts.Count
+            };
         }
     }
 }

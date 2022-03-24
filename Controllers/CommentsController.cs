@@ -26,7 +26,7 @@ namespace Fakestagram.Controllers
         [HttpGet]
         public ActionResult<List<CommentReadDTO>> GetAll()
         {
-            if (!_userService.isCurrentUserAdmin())
+            if (!_userService.IsCurrentUserAdmin())
                 return Forbid();
 
             return Ok(_commentsService.GetAllCommentsToDto());
@@ -37,7 +37,7 @@ namespace Fakestagram.Controllers
         {
             try
             {
-                if (!_userService.isCurrentUserAdmin())
+                if (!_userService.IsCurrentUserAdmin())
                     return Forbid();
 
                 return Ok(_commentsService.GetCommentsByUserId(userId));
@@ -81,7 +81,7 @@ namespace Fakestagram.Controllers
         {
             try
             {
-                if (!_userService.isCurrentUserAdmin() || _commentsService.GetById(commentId)?.UserId != _userService.GetCurrentUser()?.Id)
+                if (!_userService.IsCurrentUserAdmin() && _commentsService.GetById(commentId)?.UserId != _userService.GetCurrentUser()?.Id)
                     return Forbid();
 
                 _commentsService.Update(commentId, commentEditDTO);
@@ -100,7 +100,7 @@ namespace Fakestagram.Controllers
         {
             try
             {
-                if (!_userService.isCurrentUserAdmin() || _commentsService.GetById(commentId)?.UserId != _userService.GetCurrentUser()?.Id)
+                if (!_userService.IsCurrentUserAdmin() && _commentsService.GetById(commentId)?.UserId != _userService.GetCurrentUser()?.Id)
                     return Forbid();
 
                 _commentsService.Delete(commentId);

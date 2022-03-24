@@ -1,6 +1,16 @@
-﻿namespace Fakestagram.Data.DTOs.Users
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Fakestagram.Data.DTOs.Users
 {
     public class UserEditDTO
     {
+        [Required]
+        public string UserName { get; set; }
+        [Required]
+        public string FirstName { get; set; }
+        [Required]
+        public string LastName { get; set; }
+        [Required]
+        public string Email { get; set; }
     }
 }

@@ -42,7 +42,7 @@ namespace Fakestagram.Controllers
         [HttpGet]
         public ActionResult<List<UserReadDTO>> GetAll()
         {
-            if (!_userService.isCurrentUserAdmin())
+            if (!_userService.IsCurrentUserAdmin())
                 return Forbid();
 
             List<UserReadDTO> allUsers = _userService.GetAll();
@@ -57,7 +57,7 @@ namespace Fakestagram.Controllers
             {
                 var user = _userService.GetById(userId);
 
-                if (!_userService.isCurrentUserAdmin() || userId != _userService.GetCurrentUser()?.Id)
+                if (!_userService.IsCurrentUserAdmin() && userId != _userService.GetCurrentUser()?.Id)
                     return Forbid();
 
                 List<Post> userPosts = _postService.GetAllByUserCreatorId(userId);
@@ -82,6 +82,50 @@ namespace Fakestagram.Controllers
             catch (FileNotFoundException fnfx)
             {
                 return NotFound(_jsonErrorSerializer.Serialize(fnfx));
+            }
+        }
+
+        [HttpPut("EditUser/{userId}")]
+        public ActionResult EditUser(Guid userId, UserEditDTO userEditDto)
+        {
+            try
+            {
+                if (!_userService.IsCurrentUserAdmin() && _userService.GetCurrentUser()?.Id != userId)
+                    return Forbid();
+
+                _userService.Update(userId, userEditDto);
+
+                return NoContent();
+            }
+            catch (UserNotFoundException unfx)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(unfx));
+            }
+            catch (EmailIsAlreadyTakenException eiatx)
+            {
+                return BadRequest(_jsonErrorSerializer.Serialize(eiatx));
+            }
+            catch (UserNameIsAlreadyTakenException uiatx)
+            {
+                return BadRequest(_jsonErrorSerializer.Serialize(uiatx));
+            }
+        }
+
+        [HttpPut("ChangeUserRole/{userId}")]
+        public ActionResult ChangeUserRole(Guid userId)
+        {
+            try
+            {
+                if (!_userService.IsCurrentUserAdmin())
+                    return Forbid();
+
+                _userService.ChangeUserRole(userId);
+
+                return NoContent();
+            }
+            catch (UserNotFoundException unfx)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(unfx));
             }
         }
     }

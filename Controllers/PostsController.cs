@@ -67,7 +67,7 @@ namespace Fakestagram.Controllers
         {
             try
             {
-                if (!_userService.isCurrentUserAdmin() || _postService.GetByIdToModel(postId)?.UserCreatorId != _userService.GetCurrentUser()?.Id)
+                if (!_userService.IsCurrentUserAdmin() && _postService.GetByIdToModel(postId)?.UserCreatorId != _userService.GetCurrentUser()?.Id)
                     return Forbid();
 
                 _postService.Delete(postId);

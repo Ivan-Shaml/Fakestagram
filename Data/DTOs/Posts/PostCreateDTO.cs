@@ -7,7 +7,7 @@ namespace Fakestagram.Data.DTOs.Posts
     {
         [Required]
         [FromForm(Name = "image")]
-        public IFormFile Image { get; set; }
+        public List<IFormFile> Image { get; set; }
 
         [Required]
         [FromForm(Name = "description")]

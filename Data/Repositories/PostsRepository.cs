@@ -17,6 +17,17 @@ namespace Fakestagram.Data.Repositories
 
             this.baseUrl = _configuration.GetSection("AppBaseUrl").Value;
         }
+        private string[] DeserializeImgUrls(string imgUrlString)
+        {
+            string[] imgUrls = imgUrlString.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < imgUrls.Length; i++)
+            {
+                imgUrls[i] = $"{baseUrl}{imgUrls[i]}";
+            }
+
+            return imgUrls;
+        }
         public List<Post> GetAllByUserCreatorId(Guid id)
         {
             return _dbSet.Include(comments => comments.Comments)
@@ -41,7 +52,7 @@ namespace Fakestagram.Data.Repositories
                 postReadDTOs.Add(
                     new PostReadDTO()
                     {
-                        ImgUrl = $"{this.baseUrl}{item.ImgUrl}",
+                        ImgUrls = DeserializeImgUrls(item.ImgUrl),
                         PostId = item.Id,
                         CommentsCount = item.Comments.Count,
                         LikesCount = item.Likes.Count,
@@ -68,7 +79,7 @@ namespace Fakestagram.Data.Repositories
 
             var postReadDTO = new PostReadDTO()
             {
-                ImgUrl = $"{this.baseUrl}{post.ImgUrl}",
+                ImgUrls = DeserializeImgUrls(post.ImgUrl),
                 PostId = post.Id,
                 CommentsCount = post.Comments.Count,
                 LikesCount = post.Likes.Count,

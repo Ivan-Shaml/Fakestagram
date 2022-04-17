@@ -5,6 +5,7 @@ using Fakestagram.Exceptions;
 using Fakestagram.Models;
 using Fakestagram.Services.Contracts;
 using System.Security.Claims;
+using System.Text;
 
 namespace Fakestagram.Services
 {
@@ -14,10 +15,10 @@ namespace Fakestagram.Services
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
-        private string baseUrl;
+        private readonly string baseUrl;
 
         public PostService(IPostsRepository repo, IMapper mapper,
-                                IImageService imageService,IWebHostEnvironment environment,
+                                IImageService imageService, IWebHostEnvironment environment,
                                 IConfiguration configuration, IUserService userService
                             ) : base(repo, mapper)
         {
@@ -27,6 +28,18 @@ namespace Fakestagram.Services
             _userService = userService;
 
             this.baseUrl = _configuration.GetSection("AppBaseUrl").Value;
+        }
+
+        private string[] DeserializeImgUrls(string imgUrlString)
+        {
+            string[] imgUrls = imgUrlString.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < imgUrls.Length; i++)
+            {
+                imgUrls[i] = $"{baseUrl}{imgUrls[i]}";
+            }
+
+            return imgUrls;
         }
 
         private bool CheckFileType(string fileExtension)
@@ -63,18 +76,45 @@ namespace Fakestagram.Services
 
         public PostReadDTO SaveNewPost(PostCreateDTO postCreateDTO)
         {
-            Post p = new Post()
+            Post p = new Post();
+
+            if (postCreateDTO.Image.Count == 1)
             {
-                ImgUrl = this.UploadImage(postCreateDTO.Image),
-                Description = postCreateDTO.Description,
-                UserCreatorId = _userService.GetCurrentUser().Id
-            };
+                p = new Post()
+                {
+                    ImgUrl = this.UploadImage(postCreateDTO.Image[0]),
+                    Description = postCreateDTO.Description,
+                    UserCreatorId = _userService.GetCurrentUser().Id
+                };
+            }
+            else if (postCreateDTO.Image.Count > 1)
+            {
+                StringBuilder imagesUrls = new StringBuilder();
+                foreach (var img in postCreateDTO.Image)
+                {
+                    imagesUrls.Append($"{this.UploadImage(img)};");
+                }
+
+                p = new Post()
+                {
+                    ImgUrl = imagesUrls.ToString(),
+                    Description = postCreateDTO.Description,
+                    UserCreatorId = _userService.GetCurrentUser().Id
+                };
+            }
 
             ((IPostsRepository)_repo).Save(p);
 
-            return new PostReadDTO()
+            string[] imgUrls = p.ImgUrl.Split(';');
+
+            for (int i = 0; i < imgUrls.Length; i++)
             {
-                ImgUrl = $"{baseUrl}{p.ImgUrl}",
+                imgUrls[i] = $"{baseUrl}{imgUrls[i]}";
+            }
+
+            return new()
+            {
+                ImgUrls = DeserializeImgUrls(p.ImgUrl),
                 PostId = p.Id,
                 CommentsCount = 0,
                 LikesCount = 0,
@@ -89,9 +129,12 @@ namespace Fakestagram.Services
             if (post is null)
                 throw new InvalidDataException("Post with the specified Id was not found.");
 
-            string fullPath = Path.Combine(_environment.WebRootPath, post.ImgUrl);
+            foreach (var url in post.ImgUrl.Split(';', StringSplitOptions.RemoveEmptyEntries))
+            {
+                string fullPath = Path.Combine(_environment.WebRootPath, url);
 
-            _imageService.DeleteFile(fullPath);
+                _imageService.DeleteFile(fullPath);
+            }
 
             ((IPostsRepository)_repo).Delete(id);
         }
@@ -110,7 +153,7 @@ namespace Fakestagram.Services
 
             var postReadDTO = new PostReadDTO()
             {
-                ImgUrl = $"{baseUrl}{post.ImgUrl}",
+                ImgUrls = DeserializeImgUrls(post.ImgUrl),
                 PostId = post.Id,
                 CommentsCount = post.Comments.Count,
                 LikesCount = post.Likes.Count,
@@ -140,7 +183,7 @@ namespace Fakestagram.Services
             {
                 PostReadDTO pDto = new PostReadDTO()
                 {
-                    ImgUrl = $"{baseUrl}{post.ImgUrl}",
+                    ImgUrls = DeserializeImgUrls(post.ImgUrl),
                     PostId = post.Id,
                     CommentsCount = post.Comments.Count,
                     LikesCount = post.Likes.Count,
@@ -166,7 +209,7 @@ namespace Fakestagram.Services
 
             PostReadDTO pDto = new PostReadDTO()
             {
-                ImgUrl = $"{baseUrl}{post.ImgUrl}",
+                ImgUrls = DeserializeImgUrls(post.ImgUrl),
                 PostId = post.Id,
                 CommentsCount = post.Comments.Count,
                 LikesCount = post.Likes.Count,

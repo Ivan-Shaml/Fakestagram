@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Fakestagram.Data.DTOs;
+using Fakestagram.Data.DTOs.Users;
 using Fakestagram.Models;
 
 namespace Fakestagram.Data.AutoMapperProfile
@@ -14,6 +15,7 @@ namespace Fakestagram.Data.AutoMapperProfile
             //CreateMap<List<User>, List<UserListFollowsDTO>>();
             CreateMap<User, UserListLikesDTO>().ForMember(dto => dto.UserId, m => m.MapFrom(m => m.Id));
             //CreateMap<List<User>, List<UserListLikesDTO>>();
+            CreateMap<User, UserEditDTO>();
         }
     }
 }

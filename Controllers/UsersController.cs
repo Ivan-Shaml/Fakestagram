@@ -1,9 +1,12 @@
-﻿using Fakestagram.Data.DTOs.Users;
+﻿using AutoMapper;
+using Fakestagram.Data.DTOs.Users;
+using Fakestagram.Data.Repositories.Contracts;
 using Fakestagram.Exceptions;
 using Fakestagram.Models;
 using Fakestagram.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fakestagram.Controllers
@@ -16,12 +19,17 @@ namespace Fakestagram.Controllers
         private readonly IUserService _userService;
         private readonly IJsonErrorSerializerHelper _jsonErrorSerializer;
         private readonly IPostService _postService;
+        private readonly IUsersRepository _userRepository;
+        private readonly IMapper _autoMapper;
 
-        public UsersController(IUserService userService, IJsonErrorSerializerHelper jsonErrorSerializer, IPostService postService)
+        public UsersController(IUserService userService, IJsonErrorSerializerHelper jsonErrorSerializer,
+            IPostService postService, IUsersRepository userRepository, IMapper autoMapper)
         {
             _userService = userService;
             _jsonErrorSerializer = jsonErrorSerializer;
             _postService = postService;
+            _userRepository = userRepository;
+            _autoMapper = autoMapper;
         }
 
 
@@ -126,6 +134,43 @@ namespace Fakestagram.Controllers
             catch (UserNotFoundException unfx)
             {
                 return NotFound(_jsonErrorSerializer.Serialize(unfx));
+            }
+        }
+
+        [HttpPatch("{userId}")]
+        public ActionResult UpdateUser(Guid userId, [FromBody] JsonPatchDocument<UserEditDTO> updatedUser)
+        {
+            try
+            {
+                if (!_userService.IsCurrentUserAdmin() && _userService.GetCurrentUser()?.Id != userId)
+                    return Forbid();
+
+                var user = _userRepository.GetById(userId);
+
+                if (user == null)
+                {
+                    throw new UserNotFoundException("User with the specified id was not found.");
+                }
+
+                UserEditDTO userToEdit = _autoMapper.Map<UserEditDTO>(user);
+
+                updatedUser.ApplyTo(userToEdit, ModelState);
+
+                _userService.Update(userId, userToEdit);
+
+                return NoContent();
+            }
+            catch (UserNotFoundException unfx)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(unfx));
+            }
+            catch (EmailIsAlreadyTakenException eiatx)
+            {
+                return BadRequest(_jsonErrorSerializer.Serialize(eiatx));
+            }
+            catch (UserNameIsAlreadyTakenException uiatx)
+            {
+                return BadRequest(_jsonErrorSerializer.Serialize(uiatx));
             }
         }
     }

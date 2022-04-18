@@ -47,12 +47,12 @@ namespace Fakestagram.Controllers
         }
 
         [HttpPost]
-        public ActionResult<PostReadDTO> CreateNewPost([FromForm] PostCreateDTO postCreateDTO)
+        public async Task<ActionResult<PostReadDTO>> CreateNewPostAsync([FromForm] PostCreateDTO postCreateDTO)
         {
             try
             {
                 //string imgPath = _postService.UploadImage(image);
-                var postReadDTO = _postService.SaveNewPost(postCreateDTO);
+                var postReadDTO = await _postService.SaveNewPostAsync(postCreateDTO);
 
                 return CreatedAtRoute("GetPostById", new { postId = postReadDTO.PostId }, postReadDTO);
             }

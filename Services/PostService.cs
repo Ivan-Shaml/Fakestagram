@@ -56,7 +56,7 @@ namespace Fakestagram.Services
             }
         }
 
-        public string UploadImage(IFormFile file)
+        public async Task<string> UploadImageAsync(IFormFile file)
         {
             string fileExtension = file.FileName.Substring(file.FileName.LastIndexOf('.')).ToLower();
 
@@ -74,16 +74,14 @@ namespace Fakestagram.Services
             string filePath = _imageService.BuildPath(uploadDirectoryPath, fileName);
 
             _imageService.SaveFile(file, filePath);
-            
-            //TODO: Make file upload awaitable
 
-            _ftpBackup.UploadFileAsync(file, userDirectory, fileName);
+            await _ftpBackup.UploadFileAsync(file, userDirectory, fileName);
 
             return $"{_configuration.GetSection("ImagesUploadRoot").Value}/{userDirectory}/{fileName}";
 
         }
 
-        public PostReadDTO SaveNewPost(PostCreateDTO postCreateDTO)
+        public async Task<PostReadDTO> SaveNewPostAsync(PostCreateDTO postCreateDTO)
         {
             Post p = new Post();
 
@@ -91,7 +89,7 @@ namespace Fakestagram.Services
             {
                 p = new Post()
                 {
-                    ImgUrl = this.UploadImage(postCreateDTO.Image[0]),
+                    ImgUrl = await this.UploadImageAsync(postCreateDTO.Image[0]),
                     Description = postCreateDTO.Description,
                     UserCreatorId = _userService.GetCurrentUser().Id
                 };
@@ -101,7 +99,7 @@ namespace Fakestagram.Services
                 StringBuilder imagesUrls = new StringBuilder();
                 foreach (var img in postCreateDTO.Image)
                 {
-                    imagesUrls.Append($"{this.UploadImage(img)};");
+                    imagesUrls.Append($"{await this.UploadImageAsync(img)};");
                 }
 
                 p = new Post()

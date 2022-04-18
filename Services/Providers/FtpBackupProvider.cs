@@ -21,7 +21,7 @@ namespace Fakestagram.Services.Providers
             ftpCreds = new NetworkCredential(userName, password);
         }
 
-        public void CreateDirectory(string workingDirectory)
+        private void CreateDirectory(string workingDirectory)
         {
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create($"{ftpServerUrl}/{workingDirectory}/");
 
@@ -31,7 +31,7 @@ namespace Fakestagram.Services.Providers
 
             using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
 
-            Debug.WriteLine($"Mkdir operation completed with status code {response.StatusCode}");
+            Debug.WriteLine($"Mkdir operation completed with status code {(int)response.StatusCode}");
         }
 
         public async Task UploadFileAsync(IFormFile file, string workingDirectory, string newFileName)
@@ -58,7 +58,7 @@ namespace Fakestagram.Services.Providers
 
             using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
 
-            Debug.WriteLine($"Upload file operation completed with status code {response.StatusCode}");
+            Debug.WriteLine($"Upload file operation completed with status code {(int)response.StatusCode}");
         }
 
         public void DeleteFile(string filePath)
@@ -71,7 +71,7 @@ namespace Fakestagram.Services.Providers
             try
             {
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-                Debug.WriteLine($"Delete file operation completed with status code {response.StatusCode}");
+                Debug.WriteLine($"Delete file operation completed with status code {(int)response.StatusCode}");
             }
             catch (Exception ex)
             {

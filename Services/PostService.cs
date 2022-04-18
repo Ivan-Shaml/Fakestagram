@@ -18,6 +18,7 @@ namespace Fakestagram.Services
         private readonly IOffSiteBackupProvider _ftpBackup;
         private readonly string baseUrl;
         private readonly bool onLocalDeleteRemoveRemote;
+        private readonly bool isOffsiteBackupEnabled;
 
         public PostService(IPostsRepository repo, IMapper mapper,
                                 IImageService imageService, IWebHostEnvironment environment,
@@ -33,6 +34,7 @@ namespace Fakestagram.Services
 
             baseUrl = _configuration.GetSection("AppBaseUrl").Value;
             onLocalDeleteRemoveRemote = _configuration.GetSection("FTPConfig").GetSection("onDeleteRemoveRemote").Value.ToLower() == "true";
+            isOffsiteBackupEnabled = _configuration.GetSection("FTPConfig").GetSection("enableBackup").Value.ToLower() == "true";
         }
 
         private string[] DeserializeImgUrls(string imgUrlString)
@@ -75,10 +77,12 @@ namespace Fakestagram.Services
 
             _imageService.SaveFile(file, filePath);
 
-            await _ftpBackup.UploadFileAsync(file, userDirectory, fileName);
-
+            if (isOffsiteBackupEnabled)
+            {
+                await _ftpBackup.UploadFileAsync(file, userDirectory, fileName);
+            }
+            
             return $"{_configuration.GetSection("ImagesUploadRoot").Value}/{userDirectory}/{fileName}";
-
         }
 
         public async Task<PostReadDTO> SaveNewPostAsync(PostCreateDTO postCreateDTO)
@@ -142,7 +146,7 @@ namespace Fakestagram.Services
 
                 _imageService.DeleteFile(fullPath);
 
-                if (onLocalDeleteRemoveRemote)
+                if (isOffsiteBackupEnabled && onLocalDeleteRemoveRemote)
                 {
                     _ftpBackup.DeleteFile(url);
                 }

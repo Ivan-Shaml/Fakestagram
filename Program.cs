@@ -75,6 +75,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IAuthProvider, JwtAuthProvider>();
 builder.Services.AddScoped<IPasswordProvider, SHA512PasswordProvider>();
+builder.Services.AddScoped<IOffSiteBackupProvider, FtpBackupProvider>();
 
 // Helper-services
 

@@ -15,19 +15,24 @@ namespace Fakestagram.Services
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
+        private readonly IOffSiteBackupProvider _ftpBackup;
         private readonly string baseUrl;
+        private readonly bool onLocalDeleteRemoveRemote;
 
         public PostService(IPostsRepository repo, IMapper mapper,
                                 IImageService imageService, IWebHostEnvironment environment,
-                                IConfiguration configuration, IUserService userService
+                                IConfiguration configuration, IUserService userService,
+                                IOffSiteBackupProvider ftpBackup
                             ) : base(repo, mapper)
         {
             _imageService = imageService;
             _environment = environment;
             _configuration = configuration;
             _userService = userService;
+            _ftpBackup = ftpBackup;
 
-            this.baseUrl = _configuration.GetSection("AppBaseUrl").Value;
+            baseUrl = _configuration.GetSection("AppBaseUrl").Value;
+            onLocalDeleteRemoveRemote = _configuration.GetSection("FTPConfig").GetSection("onDeleteRemoveRemote").Value.ToLower() == "true";
         }
 
         private string[] DeserializeImgUrls(string imgUrlString)
@@ -69,6 +74,10 @@ namespace Fakestagram.Services
             string filePath = _imageService.BuildPath(uploadDirectoryPath, fileName);
 
             _imageService.SaveFile(file, filePath);
+            
+            //TODO: Make file upload awaitable
+
+            _ftpBackup.UploadFileAsync(file, userDirectory, fileName);
 
             return $"{_configuration.GetSection("ImagesUploadRoot").Value}/{userDirectory}/{fileName}";
 
@@ -134,6 +143,11 @@ namespace Fakestagram.Services
                 string fullPath = Path.Combine(_environment.WebRootPath, url);
 
                 _imageService.DeleteFile(fullPath);
+
+                if (onLocalDeleteRemoveRemote)
+                {
+                    _ftpBackup.DeleteFile(url);
+                }
             }
 
             ((IPostsRepository)_repo).Delete(id);

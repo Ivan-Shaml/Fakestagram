@@ -42,7 +42,8 @@ var tokenValidationParameters = new TokenValidationParameters
         new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JWTConfig").GetSection("TokenSecret").Value)),
     ValidateIssuer = false,
-    ValidateAudience = false
+    ValidateAudience = false,
+    ValidateLifetime = true
 };
 
 //Bearer Config

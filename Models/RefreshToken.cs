@@ -17,6 +17,7 @@ namespace Fakestagram.Models
         [Required]
         public Guid UserId { get; set; }
         public Guid? ParentRefreshTokenId { get; set; } = null;
+        public Guid JwtId { get; set; }
 
         [ForeignKey("UserId")]
         public virtual User User { get; set; }

@@ -1,6 +1,7 @@
 ﻿using Fakestagram.Data.Repositories.Contracts;
 using Fakestagram.Exceptions;
 using Fakestagram.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fakestagram.Data.Repositories
 {
@@ -21,6 +22,8 @@ namespace Fakestagram.Data.Repositories
             }
 
             _dbSet.RemoveRange(_dbSet.Where(t => t.ParentRefreshTokenId == parentTokenId).ToList());
+            
+            _context.SaveChanges();
         }
 
         public void DeleteTokenSequence(Guid parentTokenId)
@@ -33,7 +36,10 @@ namespace Fakestagram.Data.Repositories
             }
 
             DeleteAllChildTokens(parentTokenId);
+            
             _dbSet.Remove(parentToken);
+
+            _context.SaveChanges();
         }
 
         public void DeleteAllUserTokens(Guid userId)
@@ -46,15 +52,15 @@ namespace Fakestagram.Data.Repositories
             }
 
             _dbSet.RemoveRange(_dbSet.Where(t => t.UserId == userId).ToList());
+
+            _context.SaveChanges();
         }
 
-        public bool IsTokenAlreadyRotated(Guid tokenId)
+        public bool IsTokenAlreadyRotated(Guid refreshTokenId)
         {
-            var allTokensFromSequence = _dbSet.Where(t => t.ParentRefreshTokenId == tokenId || t.Id == tokenId).OrderByDescending(t => t.IAT).ToList();
+            var latestToken = _dbSet.Where(t => t.ParentRefreshTokenId == refreshTokenId || t.Id == refreshTokenId).OrderByDescending(t => t.IAT).First();
 
-            var tokenFromDb = _dbSet.FirstOrDefault(t => t.Id == tokenId);
-
-            if (allTokensFromSequence.IndexOf(tokenFromDb) == 0)
+            if (latestToken.Id != refreshTokenId)
             {
                 return true;
             }
@@ -62,21 +68,44 @@ namespace Fakestagram.Data.Repositories
             return false;
         }
 
-        public void PopTokenSequence(Guid tokenId)
+        public void PopTokenSequence(Guid refreshTokenId, int threshold)
         {
-            var parentToken = GetById(tokenId);
+            var parentToken = GetById(refreshTokenId);
 
             if (parentToken == null)
             {
                 throw new RefreshTokenNotFoundException("Refresh token with the specified Id doesn't exist.");
             }
 
-            var firstChildTokenInSequence = _dbSet.Where(t => t.ParentRefreshTokenId == tokenId)?.OrderBy(t => t.IAT)?.First();
+            var firstChildTokenInSequence = _dbSet.Where(t => t.ParentRefreshTokenId == refreshTokenId)?.OrderBy(t => t.IAT)?.First();
 
-            if (firstChildTokenInSequence != null)
+            int sequenceCount = _dbSet.Count(t => t.ParentRefreshTokenId == refreshTokenId || t.Id == refreshTokenId);
+
+            if (firstChildTokenInSequence != null && sequenceCount >= threshold)
             {
                 _dbSet.Remove(firstChildTokenInSequence);
+
+                _context.SaveChanges();
             }
+        }
+
+        public bool DoesTokenExist(string token)
+        {
+            return _dbSet.Any(t => t.RefreshJwtToken == token);
+        }
+
+        public RefreshToken GetToken(string token)
+        {
+            var tokenFromDb = _context.RefreshTokens.Where(t => t.RefreshJwtToken == token)
+                                .Include(t => t.User)
+                                .FirstOrDefault();
+
+            if (tokenFromDb == null)
+            {
+                throw new RefreshTokenNotFoundException("The refresh token doesn't exist.");
+            }
+
+            return tokenFromDb;
         }
     }
 }

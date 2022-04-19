@@ -59,7 +59,7 @@ namespace Fakestagram.Controllers
         }
 
         [HttpPost("Refresh")]
-        public ActionResult<string> Refresh(TokenAuthDTO authDto)
+        public ActionResult<TokenAuthDTO> Refresh(TokenAuthDTO authDto)
         {
             try
             {
@@ -67,9 +67,13 @@ namespace Fakestagram.Controllers
 
                 return Ok(newJwtAuthDto);
             }
-            catch (Exception ex)
+            catch (InvalidRefreshTokenException irtex)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(ex));
+                return BadRequest(_jsonErrorSerializer.Serialize(irtex));
+            }
+            catch (RefreshTokenNotFoundException rtnfex)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(rtnfex));
             }
         }
 

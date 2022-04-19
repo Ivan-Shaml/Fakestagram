@@ -34,7 +34,7 @@ namespace Fakestagram.Services
 
         public TokenAuthDTO RefreshToken(TokenAuthDTO authDto)
         {
-            throw new NotImplementedException();
+            return _jwtProvider.Refresh(authDto);
         }
 
         public void Follow(Guid userId)
@@ -78,16 +78,9 @@ namespace Fakestagram.Services
 
             ((IUsersRepository)_repo).Create(userToRegister);
 
-            string jwtToken = _jwtProvider.CreateAccessToken(userToRegister);
-            string refreshToken = _jwtProvider.CreateRefreshToken(jwtToken);
-
             user = ((IUsersRepository)_repo).GetByUsername(userToRegister.UserName);
 
-            return new TokenAuthDTO()
-            {
-                Token = jwtToken,
-                RefreshToken = refreshToken
-            };
+            return _jwtProvider.IssueNewTokenPair(userToRegister);
         }
 
         public void Unfollow(Guid userId)
@@ -109,14 +102,7 @@ namespace Fakestagram.Services
 
             if (doesPasswordsMatch)
             {
-                string jwtToken = _jwtProvider.CreateAccessToken(u);
-                string refreshToken = _jwtProvider.CreateRefreshToken(jwtToken);
-
-                return new TokenAuthDTO()
-                {
-                    Token = jwtToken,
-                    RefreshToken = refreshToken
-                };
+                return _jwtProvider.IssueNewTokenPair(u);
             }
             
             throw new UserNotFoundException("The username or password is incorrect.");

@@ -10,5 +10,6 @@ namespace Fakestagram.Data.Repositories.Contracts
         void Update(T item);
         void Save(T item);
         void Delete(Guid id);
+        T FirstOrDefault(Func<T, bool> predicate);
     }
 }

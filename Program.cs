@@ -8,7 +8,6 @@ using Fakestagram.Services.Helpers;
 using Fakestagram.Services.Providers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
@@ -23,7 +22,8 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 
 //Swagger UI with auth scheme support
-builder.Services.AddSwaggerGen(opt => {
+builder.Services.AddSwaggerGen(opt =>
+{
     opt.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
     {
         Description = "Standard authorization header using the Bearer scheme ('Bearer {token}')",
@@ -35,18 +35,22 @@ builder.Services.AddSwaggerGen(opt => {
     opt.OperationFilter<SecurityRequirementsOperationFilter>();
 }).AddSwaggerGenNewtonsoftSupport();
 
+var tokenValidationParameters = new TokenValidationParameters
+{
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey =
+        new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JWTConfig").GetSection("TokenSecret").Value)),
+    ValidateIssuer = false,
+    ValidateAudience = false
+};
 
 //Bearer Config
 builder.Services.AddAuthentication(
-    JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt => {
-        opt.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Token").Value)),
-            ValidateIssuer = false,
-            ValidateAudience = false
-        };
-    });
+    JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
+{
+    opt.TokenValidationParameters = tokenValidationParameters;
+});
 
 builder.Services.AddDbContext<FakestagramDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -58,6 +62,7 @@ builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddScoped<IFollowRepository, FollowRepository>();
 builder.Services.AddScoped<IPostsRepository, PostsRepository>();
 builder.Services.AddScoped<ICommentsRepository, CommentsRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, TokenRepository>();
 
 builder.Services.AddScoped<IPostLikesRepository, PostLikesRepository>();
 builder.Services.AddScoped<ICommentLikesRepository, CommentLikesRepository>();
@@ -79,6 +84,7 @@ builder.Services.AddScoped<IPasswordProvider, SHA512PasswordProvider>();
 // Helper-services
 
 builder.Services.AddScoped<IJsonErrorSerializerHelper, JsonErrorSerializerHelper>();
+builder.Services.AddSingleton(tokenValidationParameters);
 
 // Add webroot directory used for uploading the photos
 builder.WebHost.UseWebRoot("wwwroot");

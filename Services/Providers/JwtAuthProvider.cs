@@ -3,18 +3,29 @@ using Fakestagram.Services.Contracts;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Fakestagram.Data.DTOs.Tokens;
+using Fakestagram.Data.Repositories.Contracts;
 
 namespace Fakestagram.Services.Providers
 {
     public class JwtAuthProvider : IAuthProvider
     {
         private readonly IConfiguration _configuration;
+        private readonly IRefreshTokenRepository _tokenRepository;
+        private readonly TimeSpan accessTokenLifetime;
+        private readonly TimeSpan refreshTokenLifetime;
+        private readonly SymmetricSecurityKey tokenSecurityKey;
 
-        public JwtAuthProvider(IConfiguration configuration)
+        public JwtAuthProvider(IConfiguration configuration, IRefreshTokenRepository tokenRepository)
         {
             _configuration = configuration;
+            _tokenRepository = tokenRepository;
+            accessTokenLifetime = TimeSpan.Parse(_configuration.GetSection("JWTConfig").GetSection("AccessTokenLifetime").Value);
+            refreshTokenLifetime = TimeSpan.Parse(_configuration.GetSection("JWTConfig").GetSection("RefreshTokenLifetime").Value);
+            tokenSecurityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
+                _configuration.GetSection("JWTConfig").GetSection("TokenSecret").Value));
         }
-        public string CreateToken(User user)
+        public string CreateAccessToken(User user)
         {
             List<Claim> claims = new List<Claim>
             {
@@ -23,14 +34,11 @@ namespace Fakestagram.Services.Providers
                 new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
-            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
-                _configuration.GetSection("Token").Value));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var creds = new SigningCredentials(tokenSecurityKey, SecurityAlgorithms.HmacSha512Signature);
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.Now.AddTicks(accessTokenLifetime.Ticks),
                 signingCredentials: creds);
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
@@ -57,6 +65,16 @@ namespace Fakestagram.Services.Providers
             }
 
             return false;
+        }
+
+        public string CreateRefreshToken(string accessToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public TokenAuthDTO IssueTokenPair(TokenAuthDTO authDto)
+        {
+            throw new NotImplementedException();
         }
     }
 }

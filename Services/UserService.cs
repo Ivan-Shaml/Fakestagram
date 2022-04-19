@@ -7,6 +7,7 @@ using Fakestagram.Exceptions;
 using Fakestagram.Models;
 using Fakestagram.Services.Contracts;
 using System.Security.Claims;
+using Fakestagram.Data.DTOs.Tokens;
 
 namespace Fakestagram.Services
 {
@@ -31,6 +32,11 @@ namespace Fakestagram.Services
             _hmacSha256Provider = passwordProvider;
         }
 
+        public TokenAuthDTO RefreshToken(TokenAuthDTO authDto)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Follow(Guid userId)
         {
             Dictionary<string, string> claims = _jwtProvider.GetClaims(_httpContextAccessor.HttpContext.User);
@@ -49,7 +55,7 @@ namespace Fakestagram.Services
             return ((IUsersRepository)_repo).GetByEmail(email) != null;
         }
 
-        public string RegisterNewUser(UserRegisterDTO userRegisterDTO, out User user)
+        public TokenAuthDTO RegisterNewUser(UserRegisterDTO userRegisterDTO, out User user)
         {
             bool isEmailTaken = this.IsEmailTaken(userRegisterDTO.Email);
             bool isUserNameTaken = this.IsUserNameTaken(userRegisterDTO.UserName);
@@ -72,11 +78,16 @@ namespace Fakestagram.Services
 
             ((IUsersRepository)_repo).Create(userToRegister);
 
-            string jwt = _jwtProvider.CreateToken(userToRegister);
+            string jwtToken = _jwtProvider.CreateAccessToken(userToRegister);
+            string refreshToken = _jwtProvider.CreateRefreshToken(jwtToken);
 
             user = ((IUsersRepository)_repo).GetByUsername(userToRegister.UserName);
 
-            return jwt;
+            return new TokenAuthDTO()
+            {
+                Token = jwtToken,
+                RefreshToken = refreshToken
+            };
         }
 
         public void Unfollow(Guid userId)
@@ -87,7 +98,7 @@ namespace Fakestagram.Services
             _followRepository.Unfollow(u.Id, userId);
         }
 
-        public string UserLogin(UserLoginDTO userLoginDTO)
+        public TokenAuthDTO UserLogin(UserLoginDTO userLoginDTO)
         {
             User u = ((IUsersRepository)_repo).GetByUsername(userLoginDTO.UserName) ?? throw new UserNotFoundException("The username or password is incorrect.");
 
@@ -98,7 +109,14 @@ namespace Fakestagram.Services
 
             if (doesPasswordsMatch)
             {
-                return _jwtProvider.CreateToken(u);
+                string jwtToken = _jwtProvider.CreateAccessToken(u);
+                string refreshToken = _jwtProvider.CreateRefreshToken(jwtToken);
+
+                return new TokenAuthDTO()
+                {
+                    Token = jwtToken,
+                    RefreshToken = refreshToken
+                };
             }
             
             throw new UserNotFoundException("The username or password is incorrect.");

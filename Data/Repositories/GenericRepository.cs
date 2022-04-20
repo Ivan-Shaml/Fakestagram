@@ -68,5 +68,10 @@ namespace Fakestagram.Data.Repositories
 
             _context.SaveChanges();
         }
+
+        public T FirstOrDefault(Func<T, bool> predicate)
+        {
+            return _dbSet.FirstOrDefault(predicate);
+        }
     }
 }

@@ -15,5 +15,6 @@ namespace Fakestagram.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<PostLike> PostLikes { get; set; }
         public DbSet<CommentLike> CommentLikes { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 }

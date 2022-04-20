@@ -5,6 +5,8 @@ using Fakestagram.Services.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using Fakestagram.Data.DTOs.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Fakestagram.Controllers
 {
@@ -22,15 +24,15 @@ namespace Fakestagram.Controllers
         }
 
         [HttpPost("Register")]
-        public ActionResult<string> Register(UserRegisterDTO userRegisterDTO)
+        public ActionResult<TokenAuthDTO> Register(UserRegisterDTO userRegisterDTO)
         {
             try
             {
-                string jwt = _userService.RegisterNewUser(userRegisterDTO, out User newUser);
+                var authDto = _userService.RegisterNewUser(userRegisterDTO, out User newUser);
 
                 string userHomePageUrl = Url.Action("GetById", "UsersController");
 
-                return CreatedAtRoute(userHomePageUrl, new { Id = newUser.Id }, jwt);
+                return CreatedAtRoute(userHomePageUrl, new { Id = newUser.Id }, authDto);
             }
             catch (EmailIsAlreadyTakenException emx)
             {
@@ -43,17 +45,56 @@ namespace Fakestagram.Controllers
         }
 
         [HttpPost("Login")]
-        public ActionResult<string> Login(UserLoginDTO userLoginDTO)
+        public ActionResult<TokenAuthDTO> Login(UserLoginDTO userLoginDTO)
         {
             try
             {
-                var jwt = _userService.UserLogin(userLoginDTO);
+                var authDto = _userService.UserLogin(userLoginDTO);
 
-                return Ok(jwt);
+                return Ok(authDto);
             }
             catch (UserNotFoundException unfx)
             {
                 return BadRequest(_jsonErrorSerializer.Serialize(unfx));
+            }
+        }
+
+        [HttpPost("Refresh")]
+        public ActionResult<TokenAuthDTO> Refresh(TokenAuthDTO authDto)
+        {
+            try
+            {
+                var newJwtAuthDto = _userService.RefreshToken(authDto);
+
+                return Ok(newJwtAuthDto);
+            }
+            catch (InvalidRefreshTokenException irtex)
+            {
+                return BadRequest(_jsonErrorSerializer.Serialize(irtex));
+            }
+            catch (RefreshTokenNotFoundException rtnfex)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(rtnfex));
+            }
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public ActionResult RevokeRefreshToken(string refreshToken)
+        {
+            try
+            {
+                _userService.RevokeRefreshToken(refreshToken);
+
+                return NoContent();
+            }
+            catch (InvalidRefreshTokenException irtex)
+            {
+                return BadRequest(_jsonErrorSerializer.Serialize(irtex));
+            }
+            catch (RefreshTokenNotFoundException rtnfex)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(rtnfex));
             }
         }
 

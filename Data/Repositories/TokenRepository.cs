@@ -18,7 +18,7 @@ namespace Fakestagram.Data.Repositories
 
             if (parentToken == null)
             {
-                throw new RefreshTokenNotFoundException("Refresh token with the specified Id doesn't exist.");
+                throw new RefreshTokenNotFoundException("Refresh token with the specified Id doesnt exist.");
             }
 
             _dbSet.RemoveRange(_dbSet.Where(t => t.ParentRefreshTokenId == parentTokenId).ToList());
@@ -32,7 +32,7 @@ namespace Fakestagram.Data.Repositories
 
             if (parentToken == null)
             {
-                throw new RefreshTokenNotFoundException("Refresh token with the specified Id doesn't exist.");
+                throw new RefreshTokenNotFoundException("Refresh token with the specified Id doesnt exist.");
             }
 
             DeleteAllChildTokens(parentTokenId);
@@ -48,7 +48,7 @@ namespace Fakestagram.Data.Repositories
 
             if (parentToken == null)
             {
-                throw new RefreshTokenNotFoundException("This user haven't got tokens yet.");
+                throw new RefreshTokenNotFoundException("This user havent got tokens yet.");
             }
 
             _dbSet.RemoveRange(_dbSet.Where(t => t.UserId == userId).ToList());
@@ -74,7 +74,7 @@ namespace Fakestagram.Data.Repositories
 
             if (parentToken == null)
             {
-                throw new RefreshTokenNotFoundException("Refresh token with the specified Id doesn't exist.");
+                throw new RefreshTokenNotFoundException("Refresh token with the specified Id doesnt exist.");
             }
 
             var firstChildTokenInSequence = _dbSet.Where(t => t.ParentRefreshTokenId == refreshTokenId)?.OrderBy(t => t.IAT)?.First();
@@ -102,7 +102,7 @@ namespace Fakestagram.Data.Repositories
 
             if (tokenFromDb == null)
             {
-                throw new RefreshTokenNotFoundException("The refresh token doesn't exist.");
+                throw new RefreshTokenNotFoundException("The refresh token doesnt exist.");
             }
 
             return tokenFromDb;

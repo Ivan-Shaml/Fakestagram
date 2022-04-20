@@ -37,6 +37,12 @@ namespace Fakestagram.Services
             return _jwtProvider.Refresh(authDto);
         }
 
+        public void RevokeRefreshToken(string refreshToken)
+        {
+            User currentUser = GetCurrentUser();
+            _jwtProvider.RevokeRefreshToken(refreshToken, currentUser);
+        }
+
         public void Follow(Guid userId)
         {
             Dictionary<string, string> claims = _jwtProvider.GetClaims(_httpContextAccessor.HttpContext.User);

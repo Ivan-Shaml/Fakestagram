@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using Fakestagram.Data.DTOs.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Fakestagram.Controllers
 {
@@ -66,6 +67,26 @@ namespace Fakestagram.Controllers
                 var newJwtAuthDto = _userService.RefreshToken(authDto);
 
                 return Ok(newJwtAuthDto);
+            }
+            catch (InvalidRefreshTokenException irtex)
+            {
+                return BadRequest(_jsonErrorSerializer.Serialize(irtex));
+            }
+            catch (RefreshTokenNotFoundException rtnfex)
+            {
+                return NotFound(_jsonErrorSerializer.Serialize(rtnfex));
+            }
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public ActionResult RevokeRefreshToken(string refreshToken)
+        {
+            try
+            {
+                _userService.RevokeRefreshToken(refreshToken);
+
+                return NoContent();
             }
             catch (InvalidRefreshTokenException irtex)
             {

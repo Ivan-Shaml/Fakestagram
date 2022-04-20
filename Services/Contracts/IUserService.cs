@@ -10,6 +10,7 @@ namespace Fakestagram.Services.Contracts
         TokenAuthDTO RegisterNewUser(UserRegisterDTO userRegisterDTO, out User user);
         TokenAuthDTO UserLogin(UserLoginDTO userLoginDTO);
         TokenAuthDTO RefreshToken(TokenAuthDTO authDto);
+        void RevokeRefreshToken(string refreshToken);
         void Follow(Guid userId);
         void Unfollow(Guid userId);
         List<UserListFollowsDTO> GetUserFollowers(Guid userId);

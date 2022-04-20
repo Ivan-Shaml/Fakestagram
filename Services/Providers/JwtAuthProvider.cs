@@ -149,7 +149,7 @@ namespace Fakestagram.Services.Providers
 
             if (expiryDateTimeUtc > DateTime.UtcNow)
             {
-                throw new InvalidRefreshTokenException("The provided access token hasn't expired yet.");
+                throw new InvalidRefreshTokenException("The provided access token hasnt expired yet.");
             }
 
             var accessTokenJti = validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
@@ -158,7 +158,7 @@ namespace Fakestagram.Services.Providers
 
             if (accessTokenJti != storedRefreshToken.JwtId.ToString())
             {
-                throw new InvalidRefreshTokenException("This refresh token doesn't match the access token.");
+                throw new InvalidRefreshTokenException("This refresh token doesnt match the access token.");
             }
 
             DetectRefreshTokenReuse(storedRefreshToken);
@@ -201,6 +201,30 @@ namespace Fakestagram.Services.Providers
                 AccessToken = CreateAccessToken(user, jti),
                 RefreshToken = CreateNewRefreshToken(user.Id, jti, parentId)
             };
+        }
+
+        private void InvalidateToken(RefreshToken refreshToken)
+        {
+            refreshToken.ExpirationDateTime = DateTime.UtcNow.Subtract(new TimeSpan(0,10,0));
+
+            _tokenRepository.Save(refreshToken);
+        }
+
+        public void RevokeRefreshToken(string refreshToken, User user)
+        {
+            var storedRefreshToken = _tokenRepository.GetToken(refreshToken);
+
+            if (storedRefreshToken.User.Id != user.Id)
+            {
+                throw new InvalidRefreshTokenException("This refresh token doesnt match the user sending the request.");
+            }
+
+            if (_tokenRepository.IsTokenAlreadyRotated(storedRefreshToken.Id))
+            {
+                throw new InvalidRefreshTokenException("This refresh token is already rotated.");
+            }
+
+            InvalidateToken(storedRefreshToken);
         }
     }
 }

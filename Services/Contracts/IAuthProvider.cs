@@ -11,5 +11,6 @@ namespace Fakestagram.Services.Contracts
         bool isUserAdmin(ClaimsPrincipal userHttpContext);
         TokenAuthDTO Refresh(TokenAuthDTO authDto);
         TokenAuthDTO IssueNewTokenPair(User user, Guid? parentId = null);
+        void RevokeRefreshToken(string refreshToken, User user);
     }
 }

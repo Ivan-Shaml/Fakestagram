@@ -40,7 +40,7 @@ namespace Fakestagram.Controllers
             }
             catch (EntityAlreadyLikedException uafe)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(uafe));
+                return Conflict(_jsonErrorSerializer.Serialize(uafe));
             }
         }
 
@@ -63,7 +63,7 @@ namespace Fakestagram.Controllers
             }
             catch (EntityAlreadyDislikedException eadx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(eadx));
+                return Conflict(_jsonErrorSerializer.Serialize(eadx));
             }
         }
 

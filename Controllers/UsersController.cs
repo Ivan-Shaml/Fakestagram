@@ -112,11 +112,11 @@ namespace Fakestagram.Controllers
             }
             catch (EmailIsAlreadyTakenException eiatx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(eiatx));
+                return Conflict(_jsonErrorSerializer.Serialize(eiatx));
             }
             catch (UserNameIsAlreadyTakenException uiatx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(uiatx));
+                return Conflict(_jsonErrorSerializer.Serialize(uiatx));
             }
         }
 
@@ -167,11 +167,11 @@ namespace Fakestagram.Controllers
             }
             catch (EmailIsAlreadyTakenException eiatx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(eiatx));
+                return Conflict(_jsonErrorSerializer.Serialize(eiatx));
             }
             catch (UserNameIsAlreadyTakenException uiatx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(uiatx));
+                return Conflict(_jsonErrorSerializer.Serialize(uiatx));
             }
         }
     }

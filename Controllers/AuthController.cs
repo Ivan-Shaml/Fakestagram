@@ -36,11 +36,11 @@ namespace Fakestagram.Controllers
             }
             catch (EmailIsAlreadyTakenException emx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(emx));
+                return Conflict(_jsonErrorSerializer.Serialize(emx));
             }
             catch (UserNameIsAlreadyTakenException unx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(unx));
+                return Conflict(_jsonErrorSerializer.Serialize(unx));
             }
         }
 

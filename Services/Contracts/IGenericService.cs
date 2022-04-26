@@ -1,4 +1,5 @@
-﻿using Fakestagram.Models;
+﻿using Fakestagram.Data.DTOs.Pagination;
+using Fakestagram.Models;
 
 namespace Fakestagram.Services.Contracts
 {
@@ -8,7 +9,7 @@ namespace Fakestagram.Services.Contracts
         where TEditDTO : class
         where TReadDTO : class
     {
-        List<TReadDTO> GetAll();
+        List<TReadDTO> GetAll(PaginationParameters @params);
         TReadDTO GetById(Guid id);
         TReadDTO Insert(TCreateDTO createDto);
         TReadDTO Update(Guid entityId, TEditDTO updateDto);

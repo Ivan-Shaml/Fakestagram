@@ -6,6 +6,7 @@ using Fakestagram.Models;
 using Fakestagram.Services.Contracts;
 using System.Security.Claims;
 using System.Text;
+using Fakestagram.Data.DTOs.Pagination;
 
 namespace Fakestagram.Services
 {
@@ -19,8 +20,8 @@ namespace Fakestagram.Services
 
         public PostService(IPostsRepository repo, IMapper mapper,
                                 IImageService imageService, IWebHostEnvironment environment,
-                                IConfiguration configuration, IUserService userService
-                            ) : base(repo, mapper)
+                                IConfiguration configuration, IUserService userService, IPaginationHelper paginationHelper
+                            ) : base(repo, mapper, paginationHelper)
         {
             _imageService = imageService;
             _environment = environment;
@@ -112,13 +113,14 @@ namespace Fakestagram.Services
                 imgUrls[i] = $"{baseUrl}{imgUrls[i]}";
             }
 
-            return new()
+            return new PostReadDTO()
             {
                 ImgUrls = DeserializeImgUrls(p.ImgUrl),
                 PostId = p.Id,
                 CommentsCount = 0,
                 LikesCount = 0,
                 Description = p.Description,
+                PostedAt = p.CreationDate
             };
         }
 
@@ -157,7 +159,8 @@ namespace Fakestagram.Services
                 PostId = post.Id,
                 CommentsCount = post.Comments.Count,
                 LikesCount = post.Likes.Count,
-                Description = post.Description
+                Description = post.Description,
+                PostedAt = post.CreationDate
             };
 
             return postReadDTO;
@@ -173,9 +176,12 @@ namespace Fakestagram.Services
             return post;
         }
 
-        public override List<PostReadDTO> GetAll()
+        public override List<PostReadDTO> GetAll(PaginationParameters @params)
         {
-            var allPosts = ((IPostsRepository)_repo).GetAll();
+            int? skip = (@params?.Page - 1) * @params?.ItemsPerPage;
+            int? take = @params?.ItemsPerPage;
+
+            var allPosts = ((IPostsRepository)_repo).GetAll(skip, take);
 
             List<PostReadDTO> postReadDTOs = new List<PostReadDTO>();
 
@@ -187,11 +193,14 @@ namespace Fakestagram.Services
                     PostId = post.Id,
                     CommentsCount = post.Comments.Count,
                     LikesCount = post.Likes.Count,
-                    Description = post.Description
+                    Description = post.Description,
+                    PostedAt = post.CreationDate
                 };
 
                 postReadDTOs.Add(pDto);
             }
+
+            SetPaginationHeader(@params, take);
 
             return postReadDTOs;
         }
@@ -213,7 +222,8 @@ namespace Fakestagram.Services
                 PostId = post.Id,
                 CommentsCount = post.Comments.Count,
                 LikesCount = post.Likes.Count,
-                Description = post.Description
+                Description = post.Description,
+                PostedAt = post.CreationDate
             };
 
             return pDto;

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fakestagram.Data.DTOs.Pagination;
 using Fakestagram.Data.DTOs.Users;
 using Fakestagram.Data.Repositories.Contracts;
 using Fakestagram.Exceptions;
@@ -48,12 +49,12 @@ namespace Fakestagram.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<UserReadDTO>> GetAll()
+        public ActionResult<List<UserReadDTO>> GetAll([FromQuery] PaginationParameters @params)
         {
             if (!_userService.IsCurrentUserAdmin())
                 return Forbid();
 
-            List<UserReadDTO> allUsers = _userService.GetAll();
+            List<UserReadDTO> allUsers = _userService.GetAll(@params);
 
             return Ok(allUsers);
         }
@@ -111,11 +112,11 @@ namespace Fakestagram.Controllers
             }
             catch (EmailIsAlreadyTakenException eiatx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(eiatx));
+                return Conflict(_jsonErrorSerializer.Serialize(eiatx));
             }
             catch (UserNameIsAlreadyTakenException uiatx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(uiatx));
+                return Conflict(_jsonErrorSerializer.Serialize(uiatx));
             }
         }
 
@@ -166,11 +167,11 @@ namespace Fakestagram.Controllers
             }
             catch (EmailIsAlreadyTakenException eiatx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(eiatx));
+                return Conflict(_jsonErrorSerializer.Serialize(eiatx));
             }
             catch (UserNameIsAlreadyTakenException uiatx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(uiatx));
+                return Conflict(_jsonErrorSerializer.Serialize(uiatx));
             }
         }
     }

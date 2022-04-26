@@ -66,7 +66,7 @@ namespace Fakestagram.Controllers
             }
             catch (EntityAlreadyDislikedException eadx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(eadx));
+                return Conflict(_jsonErrorSerializer.Serialize(eadx));
             }
             catch (InvalidDataException idx)
             {
@@ -89,7 +89,7 @@ namespace Fakestagram.Controllers
             }
             catch (EntityAlreadyDislikedException eadx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(eadx));
+                return Conflict(_jsonErrorSerializer.Serialize(eadx));
             }
             catch (InvalidDataException idx)
             {
@@ -112,7 +112,7 @@ namespace Fakestagram.Controllers
             }
             catch (EntityAlreadyLikedException eadx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(eadx));
+                return Conflict(_jsonErrorSerializer.Serialize(eadx));
             }
             catch (InvalidDataException idx)
             {
@@ -135,7 +135,7 @@ namespace Fakestagram.Controllers
             }
             catch (EntityAlreadyLikedException eadx)
             {
-                return BadRequest(_jsonErrorSerializer.Serialize(eadx));
+                return Conflict(_jsonErrorSerializer.Serialize(eadx));
             }
             catch (InvalidDataException idx)
             {

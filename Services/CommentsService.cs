@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Fakestagram.Data.DTOs.Comments;
+using Fakestagram.Data.DTOs.Pagination;
 using Fakestagram.Data.Repositories.Contracts;
 using Fakestagram.Models;
 using Fakestagram.Services.Contracts;
@@ -11,21 +12,35 @@ namespace Fakestagram.Services
         private readonly IUserService _userService;
         private readonly IPostService _postService;
 
-        public CommentsService(ICommentsRepository repo, IMapper mapper, IUserService userService, IPostService postService)
-            : base(repo, mapper)
+        public CommentsService(ICommentsRepository repo, IMapper mapper, IUserService userService, IPostService postService, IPaginationHelper paginationHelper)
+            : base(repo, mapper, paginationHelper)
         {
             _userService = userService;
             _postService = postService;
         }
 
-        public IEnumerable<CommentReadDTO> GetCommentsByPostId(Guid postId)
+        public IEnumerable<CommentReadDTO> GetCommentsByPostId(Guid postId, PaginationParameters @params)
         {
-            return ((ICommentsRepository) _repo).GetCommentsByPostId(postId);
+            int? skip = (@params?.Page - 1) * @params?.ItemsPerPage;
+            int? take = @params?.ItemsPerPage;
+
+            int totalCount = _repo.Count(p => p.PostId == postId);
+
+            SetPaginationHeader(@params, take, totalCount);
+
+            return ((ICommentsRepository) _repo).GetCommentsByPostId(postId, skip, take);
         }
 
-        public IEnumerable<CommentReadDTO> GetCommentsByUserId(Guid userId)
+        public IEnumerable<CommentReadDTO> GetCommentsByUserId(Guid userId, PaginationParameters @params)
         {
-            return ((ICommentsRepository)_repo).GetCommentsByUserId(userId);
+            int? skip = (@params?.Page - 1) * @params?.ItemsPerPage;
+            int? take = @params?.ItemsPerPage;
+
+            int totalCount = _repo.Count(p => p.UserId == userId);
+
+            SetPaginationHeader(@params, take, totalCount);
+
+            return ((ICommentsRepository)_repo).GetCommentsByUserId(userId, skip, take);
         }
 
         public override CommentReadDTO Insert(CommentCreateDTO createDto)
@@ -80,9 +95,14 @@ namespace Fakestagram.Services
             return ((ICommentsRepository)_repo).GetCommentByIdToDto(entityId);
         }
 
-        public IEnumerable<CommentReadDTO> GetAllCommentsToDto()
+        public IEnumerable<CommentReadDTO> GetAllCommentsToDto(PaginationParameters @params)
         {
-            return ((ICommentsRepository)_repo).GetAllCommentsToDto();
+            int? skip = (@params?.Page - 1) * @params?.ItemsPerPage;
+            int? take = @params?.ItemsPerPage;
+            
+            SetPaginationHeader(@params, take);
+
+            return ((ICommentsRepository)_repo).GetAllCommentsToDto(skip, take);
         }
     }
 }

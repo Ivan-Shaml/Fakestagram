@@ -7,6 +7,7 @@ using Fakestagram.Exceptions;
 using Fakestagram.Models;
 using Fakestagram.Services.Contracts;
 using System.Security.Claims;
+using Fakestagram.Data.DTOs.Pagination;
 using Fakestagram.Data.DTOs.Tokens;
 
 namespace Fakestagram.Services
@@ -21,9 +22,10 @@ namespace Fakestagram.Services
 
         public UserService(IUsersRepository repo, IMapper mapper, IPostsRepository postsRepository,
                            IFollowRepository followRepository, IHttpContextAccessor httpContextAccessor,
-                           IAuthProvider authProvider, IPasswordProvider passwordProvider
+                           IAuthProvider authProvider, IPasswordProvider passwordProvider,
+                           IPaginationHelper paginationHelper
                           )
-                : base(repo, mapper)
+                : base(repo, mapper, paginationHelper)
         {
             _postsRepository = postsRepository;
             _followRepository = followRepository;
@@ -110,7 +112,7 @@ namespace Fakestagram.Services
             {
                 return _jwtProvider.IssueNewTokenPair(u);
             }
-            
+
             throw new UserNotFoundException("The username or password is incorrect.");
         }
         public override UserReadDTO GetById(Guid id)
@@ -146,9 +148,12 @@ namespace Fakestagram.Services
             return ((IUsersRepository)_repo).GetById(Guid.Parse(claims["userId"])) ?? throw new UserNotFoundException("The user is not found.");
         }
 
-        public override List<UserReadDTO> GetAll()
+        public override List<UserReadDTO> GetAll(PaginationParameters @params)
         {
-            IEnumerable<User> allUsers = ((IUsersRepository)_repo).GetAll();
+            int? skip = (@params?.Page - 1) * @params?.ItemsPerPage;
+            int? take = @params?.ItemsPerPage;
+
+            IEnumerable<User> allUsers = ((IUsersRepository)_repo).GetAll(skip, take);
 
             List<UserReadDTO> allUsersToDto = new List<UserReadDTO>();
 
@@ -170,6 +175,8 @@ namespace Fakestagram.Services
 
                 allUsersToDto.Add(userReadDTO);
             }
+
+            SetPaginationHeader(@params, take);
 
             return allUsersToDto;
         }
@@ -195,14 +202,14 @@ namespace Fakestagram.Services
 
         public void ChangeUserRole(Guid userId)
         {
-            var user = ((IUsersRepository) _repo).GetById(userId) ??
+            var user = ((IUsersRepository)_repo).GetById(userId) ??
                        throw new UserNotFoundException("User with the specified Id is not found.");
 
             if (user.Role == UserRoles.Administrator)
             {
                 user.Role = UserRoles.Regular;
             }
-            else if(user.Role == UserRoles.Regular)
+            else if (user.Role == UserRoles.Regular)
             {
                 user.Role = UserRoles.Administrator;
             }
@@ -212,7 +219,7 @@ namespace Fakestagram.Services
 
         public override UserReadDTO Update(Guid entityId, UserEditDTO updateDto)
         {
-            var userFromDb = ((IUsersRepository) _repo).GetById(entityId) ??
+            var userFromDb = ((IUsersRepository)_repo).GetById(entityId) ??
                              throw new UserNotFoundException("User with the specified Id is not found.");
 
             if (userFromDb.Email != updateDto.Email && this.IsEmailTaken(updateDto.Email))

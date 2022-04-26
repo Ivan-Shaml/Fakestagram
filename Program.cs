@@ -85,6 +85,7 @@ builder.Services.AddScoped<IPasswordProvider, SHA512PasswordProvider>();
 // Helper-services
 
 builder.Services.AddScoped<IJsonErrorSerializerHelper, JsonErrorSerializerHelper>();
+builder.Services.AddScoped<IPaginationHelper, PaginationHelper>();
 builder.Services.AddSingleton(tokenValidationParameters);
 
 // Add webroot directory used for uploading the photos

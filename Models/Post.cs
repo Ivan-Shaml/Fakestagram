@@ -7,9 +7,12 @@ namespace Fakestagram.Models
     {
         [Required]
         public Guid UserCreatorId { get; set; }
-        
+
         [Required]
         public string ImgUrl { get; set; }
+
+        [Required]
+        public DateTime CreationDate { get; set; } = DateTime.UtcNow;
 
         [Required]
         public string Description { get; set; } = string.Empty;

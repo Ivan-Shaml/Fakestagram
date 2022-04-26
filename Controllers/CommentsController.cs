@@ -1,4 +1,5 @@
 ﻿using Fakestagram.Data.DTOs.Comments;
+using Fakestagram.Data.DTOs.Pagination;
 using Fakestagram.Exceptions;
 using Fakestagram.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
@@ -24,23 +25,23 @@ namespace Fakestagram.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<CommentReadDTO>> GetAll()
+        public ActionResult<List<CommentReadDTO>> GetAll([FromQuery] PaginationParameters @params)
         {
             if (!_userService.IsCurrentUserAdmin())
                 return Forbid();
 
-            return Ok(_commentsService.GetAllCommentsToDto());
+            return Ok(_commentsService.GetAllCommentsToDto(@params));
         }
 
         [HttpGet("GetAllCommentsPostedByUser/{userId}")]
-        public ActionResult<List<CommentReadDTO>> GetAllCommentsPostedByUser(Guid userId)
+        public ActionResult<List<CommentReadDTO>> GetAllCommentsPostedByUser(Guid userId, [FromQuery] PaginationParameters @params)
         {
             try
             {
                 if (!_userService.IsCurrentUserAdmin())
                     return Forbid();
 
-                return Ok(_commentsService.GetCommentsByUserId(userId));
+                return Ok(_commentsService.GetCommentsByUserId(userId, @params));
             }
             catch (UserNotFoundException unfx)
             {
@@ -50,11 +51,11 @@ namespace Fakestagram.Controllers
 
         [HttpGet("GetAllCommentsForPost/{postId}")]
         [AllowAnonymous]
-        public ActionResult<List<CommentReadDTO>> GetAllCommentsForPost(Guid postId)
+        public ActionResult<List<CommentReadDTO>> GetAllCommentsForPost(Guid postId, [FromQuery] PaginationParameters @params)
         {
             try
             {
-                return Ok(_commentsService.GetCommentsByPostId(postId));
+                return Ok(_commentsService.GetCommentsByPostId(postId, @params));
             }
             catch (PostNotFoundException pnfx)
             {

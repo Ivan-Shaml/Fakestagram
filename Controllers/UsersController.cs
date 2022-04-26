@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fakestagram.Data.DTOs.Pagination;
 using Fakestagram.Data.DTOs.Users;
 using Fakestagram.Data.Repositories.Contracts;
 using Fakestagram.Exceptions;
@@ -48,12 +49,12 @@ namespace Fakestagram.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<UserReadDTO>> GetAll()
+        public ActionResult<List<UserReadDTO>> GetAll([FromQuery] PaginationParameters @params)
         {
             if (!_userService.IsCurrentUserAdmin())
                 return Forbid();
 
-            List<UserReadDTO> allUsers = _userService.GetAll();
+            List<UserReadDTO> allUsers = _userService.GetAll(@params);
 
             return Ok(allUsers);
         }

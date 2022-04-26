@@ -10,6 +10,7 @@ namespace Fakestagram.Data.Repositories
     {
         private readonly IConfiguration _configuration;
         private string baseUrl;
+
         public PostsRepository(FakestagramDbContext context, IConfiguration configuration)
             :base(context)
         {
@@ -56,7 +57,8 @@ namespace Fakestagram.Data.Repositories
                         PostId = item.Id,
                         CommentsCount = item.Comments.Count,
                         LikesCount = item.Likes.Count,
-                        Description = item.Description
+                        Description = item.Description,
+                        PostedAt = item.CreationDate
                     }
                 );
             }
@@ -83,7 +85,8 @@ namespace Fakestagram.Data.Repositories
                 PostId = post.Id,
                 CommentsCount = post.Comments.Count,
                 LikesCount = post.Likes.Count,
-                Description = post.Description
+                Description = post.Description,
+                PostedAt = post.CreationDate
             };
 
             return postReadDTO;
@@ -101,9 +104,21 @@ namespace Fakestagram.Data.Repositories
             return post;
         }
 
-        public override IEnumerable<Post> GetAll()
+        public override IEnumerable<Post> GetAll(int? skip, int? take)
         {
-            return _context.Posts.Include(c => c.Comments).Include(l => l.Likes).ToList();
+            skip ??= 0;
+            take ??= 0;
+
+            if (skip <= 0 && take <= 0)
+            {
+                return _context.Posts.Include(c => c.Comments).Include(l => l.Likes).ToList();
+            }
+
+            return _context.Posts.Include(c => c.Comments).Include(l => l.Likes)
+                .OrderBy(c => c.CreationDate)
+                .Skip(skip.Value)
+                .Take(take.Value)
+                .ToList();
         }
     }
 }

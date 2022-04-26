@@ -1,4 +1,5 @@
-﻿using Fakestagram.Data.DTOs.Posts;
+﻿using Fakestagram.Data.DTOs.Pagination;
+using Fakestagram.Data.DTOs.Posts;
 using Fakestagram.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -25,9 +26,9 @@ namespace Fakestagram.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult<List<PostReadDTO>> GetAll()
+        public ActionResult<List<PostReadDTO>> GetAll([FromQuery] PaginationParameters @params)
         {
-            return Ok(_postService.GetAll());
+            return Ok(_postService.GetAll(@params));
         }
 
         [HttpGet("{postId}", Name = "GetPostById")]

@@ -1,6 +1,7 @@
 ﻿using Fakestagram.Data.Repositories.Contracts;
 using Fakestagram.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Fakestagram.Data.Repositories
 {
@@ -15,7 +16,21 @@ namespace Fakestagram.Data.Repositories
             _dbSet = _context.Set<T>();
         }
 
-        public virtual IEnumerable<T> GetAll() => _dbSet.ToList();
+        public virtual IEnumerable<T> GetAll(int? skip, int? take)
+        {
+            skip ??= 0;
+            take ??= 0;
+
+            if (skip <= 0 && take <= 0)
+            {
+                return _dbSet.ToList();
+            }
+            return _dbSet
+                .OrderBy(x => x.Id)
+                .Skip(skip.Value)
+                .Take(take.Value)
+                .ToList();
+        }
 
         public virtual T GetById(Guid id)
         {
@@ -72,6 +87,16 @@ namespace Fakestagram.Data.Repositories
         public T FirstOrDefault(Func<T, bool> predicate)
         {
             return _dbSet.FirstOrDefault(predicate);
+        }
+
+        public int Count(Func<T, bool> predicate)
+        {
+            if (predicate is null)
+            {
+                return _dbSet.Count();
+            }
+
+            return _dbSet.Count(predicate);
         }
     }
 }

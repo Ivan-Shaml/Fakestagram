@@ -1,3 +1,4 @@
+using System.Reflection;
 using Fakestagram.Data;
 using Fakestagram.Data.AutoMapperProfile;
 using Fakestagram.Data.Repositories;
@@ -24,6 +25,8 @@ builder.Services.AddEndpointsApiExplorer();
 //Swagger UI with auth scheme support
 builder.Services.AddSwaggerGen(opt =>
 {
+
+    //Bearer token auth definition
     opt.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
     {
         Description = "Standard authorization header using the Bearer scheme ('Bearer {token}')",
@@ -33,6 +36,12 @@ builder.Services.AddSwaggerGen(opt =>
     });
 
     opt.OperationFilter<SecurityRequirementsOperationFilter>();
+
+    //Enable XML additional documentation
+    string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    opt.IncludeXmlComments(xmlPath);
+
 }).AddSwaggerGenNewtonsoftSupport();
 
 var tokenValidationParameters = new TokenValidationParameters

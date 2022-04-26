@@ -27,7 +27,7 @@ namespace Fakestagram.Controllers
         }
 
         /// <summary>
-        /// Get all posts in the database.
+        /// Get all posts from the database.
         /// </summary>
         /// <remarks>
         /// The X-Pagination HTTP header contains metadata for the pagination.

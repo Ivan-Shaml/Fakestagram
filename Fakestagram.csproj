@@ -34,4 +34,9 @@
     <Folder Include="wwwroot\imgs\edba9568-8fbe-4df9-767f-08da069c933a\" />
   </ItemGroup>
 
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+	</PropertyGroup>
+
 </Project>

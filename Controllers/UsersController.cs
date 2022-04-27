@@ -5,6 +5,7 @@ using Fakestagram.Data.Repositories.Contracts;
 using Fakestagram.Exceptions;
 using Fakestagram.Models;
 using Fakestagram.Services.Contracts;
+using Fakestagram.SwaggerExamples.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -15,6 +16,7 @@ namespace Fakestagram.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [Produces("application/json")]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -33,8 +35,14 @@ namespace Fakestagram.Controllers
             _autoMapper = autoMapper;
         }
 
-
+        /// <summary>
+        /// Get single user.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <response code="404">User with the specified id doesn't exist.</response>
         [HttpGet("{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(CustomExceptionExample))]
         public ActionResult<UserReadDTO> GetById(Guid userId)
         {
             try
@@ -48,7 +56,16 @@ namespace Fakestagram.Controllers
             }
         }
 
+        /// <summary>
+        /// Get all users from the database.
+        /// </summary>
+        /// <remarks>
+        /// Admin privileges are required. The X-Pagination HTTP header contains metadata for the pagination.
+        /// </remarks>
+        /// <param name="params"></param>
+        /// <response code="403">User isn't admin.</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<List<UserReadDTO>> GetAll([FromQuery] PaginationParameters @params)
         {
             if (!_userService.IsCurrentUserAdmin())
@@ -59,7 +76,22 @@ namespace Fakestagram.Controllers
             return Ok(allUsers);
         }
 
+        /// <summary>
+        /// Delete a user.
+        /// </summary>
+        /// <remarks>
+        /// Admin privileges required to delete other users. Deletes also user's posts and comments.
+        /// </remarks>
+        /// <param name="userId"></param>
+        /// <response code="404">User with the specified id doesn't exist. See the error message for more information.</response>
+        /// <response code="403">The current user isn't admin, or tries to delete another user.</response>
+        /// <response code="204">User deleted successfully.</response>
+        /// <response code="400">Invalid JWT claims.</response>
         [HttpDelete("{userId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(CustomExceptionExample))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(CustomExceptionExample))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(CustomExceptionExample))]
         public ActionResult DeleteUser(Guid userId)
         {
             try
@@ -94,7 +126,22 @@ namespace Fakestagram.Controllers
             }
         }
 
+        /// <summary>
+        /// Edit a user as an object.
+        /// </summary>
+        /// <remarks>
+        /// Admin privileges required to edit other users.
+        /// </remarks>
+        /// <param name="userId"></param>
+        /// <param name="userEditDto"></param>
+        /// <response code="403">The current user isn't admin, or tries to edit another user.</response>
+        /// <response code="404">User with the specified id doesn't exist.</response>
+        /// <response code="204">User updated successfully.</response>
+        /// <response code="409">Email or username is already in use. Check the error message for more details.</response>
         [HttpPut("EditUser/{userId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(CustomExceptionExample))]
+        [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(CustomExceptionExample))]
         public ActionResult EditUser(Guid userId, UserEditDTO userEditDto)
         {
             try
@@ -120,7 +167,15 @@ namespace Fakestagram.Controllers
             }
         }
 
+        /// <summary>
+        /// Change user role.
+        /// </summary>
+        /// <remarks>Admin privileges required to change the role of a user.</remarks>
+        /// <param name="userId"></param>
+        /// <response code="204">Role changed successfully.</response>
+        /// <response code="404">User with the specified id doesn't exist.</response>
         [HttpPut("ChangeUserRole/{userId}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(CustomExceptionExample))]
         public ActionResult ChangeUserRole(Guid userId)
         {
             try
@@ -138,7 +193,22 @@ namespace Fakestagram.Controllers
             }
         }
 
+        /// <summary>
+        /// Partially update a user object.
+        /// </summary>
+        /// <remarks>
+        /// Admin privileges required to edit other users.
+        /// </remarks>
+        /// <param name="userId"></param>
+        /// <param name="updatedUser"></param>
+        /// <response code="403">The current user isn't admin, or tries to edit another user.</response>
+        /// <response code="404">User with the specified id doesn't exist.</response>
+        /// <response code="204">User updated successfully.</response>
+        /// <response code="409">Email or username is already in use. Check the error message for more details.</response>
         [HttpPatch("{userId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(CustomExceptionExample))]
+        [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(CustomExceptionExample))]
         public ActionResult UpdateUser(Guid userId, [FromBody] JsonPatchDocument<UserEditDTO> updatedUser)
         {
             try

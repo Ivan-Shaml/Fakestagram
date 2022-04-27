@@ -7,8 +7,8 @@ using Fakestagram.Models;
 using Fakestagram.Services.Contracts;
 using Fakestagram.SwaggerExamples.Responses;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fakestagram.Controllers
@@ -205,16 +205,23 @@ namespace Fakestagram.Controllers
         /// <response code="404">User with the specified id doesn't exist.</response>
         /// <response code="204">User updated successfully.</response>
         /// <response code="409">Email or username is already in use. Check the error message for more details.</response>
+        /// <response code="400">Invalid operation or violating data validation constraints. Check the error message for more details.</response>
         [HttpPatch("{userId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(CustomExceptionExample))]
         [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(CustomExceptionExample))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(CustomExceptionExample))]
         public ActionResult UpdateUser(Guid userId, [FromBody] JsonPatchDocument<UserEditDTO> updatedUser)
         {
             try
             {
                 if (!_userService.IsCurrentUserAdmin() && _userService.GetCurrentUser()?.Id != userId)
                     return Forbid();
+
+                if (!updatedUser.Operations.TrueForAll(x => x.OperationType == OperationType.Replace))
+                {
+                    return BadRequest(_jsonErrorSerializer.Serialize(new Exception("Only replace operation is supported.")));
+                }
 
                 var user = _userRepository.GetById(userId);
 
@@ -226,6 +233,16 @@ namespace Fakestagram.Controllers
                 UserEditDTO userToEdit = _autoMapper.Map<UserEditDTO>(user);
 
                 updatedUser.ApplyTo(userToEdit, ModelState);
+
+                if (!TryValidateModel(userToEdit))
+                {
+                    var errorMessage = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(v => v.ErrorMessage + " " + v.Exception)
+                        .ToList();
+
+                    return BadRequest(new { errorMessage = errorMessage });
+                }
 
                 _userService.Update(userId, userToEdit);
 

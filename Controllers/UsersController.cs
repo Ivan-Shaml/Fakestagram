@@ -197,7 +197,23 @@ namespace Fakestagram.Controllers
         /// Partially update a user object.
         /// </summary>
         /// <remarks>
-        /// Admin privileges required to edit other users.
+        /// Admin privileges required to edit other users. Only "replace" operation is supported.
+        ///
+        /// **Sample request:**
+        /// 
+        ///             PATCH /api/Users/f89d7b44-7175-4e98-d41b-08da08f6ec52
+        ///             [
+        ///                 {
+        ///                     "op":"replace",
+        ///                     "path":"/FirstName",
+        ///                     "value":"Ivan"
+        ///                 },
+        ///                 {
+        ///                     "op":"replace",
+        ///                     "path":"/LastName",
+        ///                     "value":"Ivanov"
+        ///                  }
+        ///              ]
         /// </remarks>
         /// <param name="userId"></param>
         /// <param name="updatedUser"></param>
@@ -238,7 +254,7 @@ namespace Fakestagram.Controllers
                 {
                     var errorMessage = ModelState.Values
                         .SelectMany(v => v.Errors)
-                        .Select(v => v.ErrorMessage + " " + v.Exception)
+                        .Select(v => v.ErrorMessage)
                         .ToList();
 
                     return BadRequest(new { errorMessage = errorMessage });
